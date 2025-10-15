@@ -9,13 +9,18 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "html5-qrcode": "^2.3.8",
     "next": "15.5.5",
+    "qrcode": "^1.5.4",
+    "qrcode.react": "^4.2.0",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/estree": "^1.0.8",
+    "@types/json-schema": "^7.0.15",
     "@types/node": "^20.19.21",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19",
