@@ -3,7 +3,6 @@ import React from 'react';
 import EventList from '@components/admin/EventList';
 import { IEvent } from '@lib/types';
 
-// Function to fetch events on the server
 async function getEvents() {
   try {
     // We use the full URL because this fetch runs on the server
