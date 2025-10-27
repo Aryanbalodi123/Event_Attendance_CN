@@ -1,8 +1,9 @@
 // src/components/student/StudentEventScanner.tsx
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Html5QrcodeScanner, QrcodeSuccessCallback, Html5QrcodeResult } from 'html5-qrcode';
+// FIX: Import useCallback
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Html5QrcodeScanner, QrcodeSuccessCallback } from 'html5-qrcode';
 import { CheckCircle, XCircle } from 'lucide-react';
 import Spinner from '@/components/ui/Spinner';
 import Toast from '@/components/ui/Toast';
@@ -18,134 +19,150 @@ const StudentEventScanner: React.FC<StudentEventScannerProps> = ({ participantId
   const [scannedData, setScannedData] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  
-  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
-  const containerIdRef = useRef<string>(`qr-reader-student-${Math.random().toString(36).slice(2)}`);
 
-  const handleScanSuccess: QrcodeSuccessCallback = async (
-    decodedText: string, 
-    decodedResult: Html5QrcodeResult
+  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+  // FIX: Used crypto.randomUUID for a more robust unique ID if available in the environment
+  const containerIdRef = useRef<string>(`qr-reader-student-${globalThis.crypto?.randomUUID ? globalThis.crypto.randomUUID() : Math.random().toString(36).slice(2)}`);
+
+  // FIX: Wrap handleScanSuccess in useCallback
+  const handleScanSuccess: QrcodeSuccessCallback = useCallback(async (
+    decodedText: string
+    // FIX: Removed unused 'decodedResult'
+    /* decodedResult: Html5QrcodeResult */
   ) => {
     // Prevent re-scanning the same code while one is processing
-    if (decodedText === scannedData || status === 'loading') {
-      return;
-    }
+    // Use function form of setStatus to avoid stale state dependency
+    let shouldProcess = true;
+    setStatus(currentStatus => {
+        if (decodedText === scannedData || currentStatus === 'loading') {
+            shouldProcess = false;
+        }
+        return currentStatus === 'loading' ? currentStatus : 'loading'; // Set loading only if not already processing
+    });
+
+    if (!shouldProcess) return;
+
 
     const eventId = decodedText; // The scanned data is the Event ID
     setScannedData(eventId);
-    setStatus('loading');
     setMessage('Processing check-in...');
 
     try {
-      // Use the same API endpoint as the admin scanner
       const res = await fetch('/api/attendance/mark', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // Pass both IDs, but this time participantId is from props
-        // and eventId is from the scan
         body: JSON.stringify({ participantId, eventId }),
       });
 
       const data = await res.json();
-      if (!data.success) throw new Error(data.error);
+      if (!res.ok || !data.success) { // Check res.ok as well
+        throw new Error(data.error || 'Check-in API call failed');
+       }
 
       setStatus('success');
       const successMsg = data.message || `Checked in successfully!`;
       setMessage(successMsg);
       setToastMessage(successMsg);
       setShowToast(true);
-      
+
       // Stop the scanner on success
       if (scannerRef.current) {
         scannerRef.current.clear().catch(error => {
-          console.error("Failed to clear html5QrcodeScanner.", error);
+          console.error("Failed to clear html5QrcodeScanner on success.", error);
         });
-        scannerRef.current = null;
+        scannerRef.current = null; // Ensure scanner instance is cleared
       }
 
-    } catch (err) {
+    } catch (err: unknown) { // Use unknown type
       setStatus('error');
-      setMessage(`Check-in Failed: ${(err as Error).message}`);
+      setMessage(`Check-in Failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
 
-      // Reset after a few seconds to allow scanning again
+      // Reset after a few seconds ONLY on error to allow scanning again
       setTimeout(() => {
         setStatus(null);
         setMessage('');
         setScannedData(null);
       }, 4000);
     }
-  };
+   // FIX: Add dependencies for useCallback
+  }, [participantId, scannedData]);
 
-  const handleScanError = (errorMessage: string) => { /* Ignore errors */ };
+  // FIX: Removed unused 'errorMessage'
+  const handleScanError = (/* errorMessage: string */) => { /* Ignore non-fatal errors */ };
 
   useEffect(() => {
-    // Clean up any existing scanner first
-    if (scannerRef.current) {
-      scannerRef.current.clear().catch(error => {
-        console.error("Failed to clear html5QrcodeScanner.", error);
-      });
-      scannerRef.current = null;
+    // Check if scanner element exists before creating scanner
+    const scannerElement = document.getElementById(containerIdRef.current);
+    if (!scannerElement) {
+        console.error(`Scanner container element with ID ${containerIdRef.current} not found.`);
+        return;
     }
 
-    // Create new scanner
-    const html5QrcodeScanner = new Html5QrcodeScanner(
-      containerIdRef.current,
-      {
-        fps: 10, 
-        qrbox: { width: 250, height: 250 }, 
-        rememberLastUsedCamera: true,
-        supportedScanTypes: [0], // 0 = SCAN_TYPE_CAMERA
-      },
-      false // verbose
-    );
+    // Only create scanner if it doesn't exist and status is not 'success'
+    // This prevents re-rendering scanner after successful scan
+    if (!scannerRef.current && status !== 'success') {
+         const html5QrcodeScanner = new Html5QrcodeScanner(
+            containerIdRef.current,
+            {
+              fps: 10,
+              qrbox: { width: 250, height: 250 },
+              rememberLastUsedCamera: true,
+              supportedScanTypes: [0], // SCAN_TYPE_CAMERA
+            },
+            false // verbose
+          );
 
-    scannerRef.current = html5QrcodeScanner;
-    
-    // Start scanning
-    html5QrcodeScanner.render(handleScanSuccess, handleScanError);
+         scannerRef.current = html5QrcodeScanner;
+         html5QrcodeScanner.render(handleScanSuccess, handleScanError);
+    }
 
     // Cleanup function to stop the scanner when the component unmounts
+    // OR if the status becomes 'success' (scanner cleared internally then)
     return () => {
       if (scannerRef.current) {
         scannerRef.current.clear().catch(error => {
-          console.error("Failed to clear html5QrcodeScanner.", error);
+          console.error("Failed to clear html5QrcodeScanner on cleanup.", error);
         });
         scannerRef.current = null;
       }
     };
-  }, []); // Empty dependency array since we want this to run only once
+  // FIX: Add handleScanSuccess and status to dependency array
+  }, [handleScanSuccess, status]); // Added handleScanSuccess and status
 
   return (
     <div className="w-full max-w-md mx-auto">
-      
-      {/* Show scanner only if not successful */}
+
+      {/* Show scanner container only if not successful */}
       {status !== 'success' && (
-        <div id={containerIdRef.current} className="w-full rounded-2xl overflow-hidden border-4 border-gray-800 mb-4"></div>
+        <div id={containerIdRef.current} className="w-full rounded-2xl overflow-hidden border-4 border-gray-800 mb-4 min-h-[300px]">
+          {/* Content inside is rendered by html5-qrcode library */}
+        </div>
       )}
 
       {/* Status Message Display */}
-      <div className="h-20">
+      <div className="h-20 flex items-center justify-center"> {/* Centering content */}
         {status === 'loading' && (
           <div className="flex flex-col items-center justify-center text-orange-500">
             <Spinner />
-            <p className="mt-2">{message}</p>
+            <p className="mt-2 text-sm">{message}</p>
           </div>
         )}
         {status === 'error' && (
-          <div className="flex flex-col items-center justify-center text-red-400 p-4 bg-red-900/50 rounded-lg">
+          <div className="flex flex-col items-center justify-center text-red-400 p-4 bg-red-900/50 rounded-lg w-full">
             <XCircle size={32} />
-            <p className="mt-2 font-semibold text-center">{message}</p>
+            <p className="mt-2 font-semibold text-center text-sm">{message}</p>
           </div>
         )}
          {status === 'success' && (
-          <div className="flex flex-col items-center justify-center text-green-400 p-4 bg-green-900/50 rounded-lg">
+          <div className="flex flex-col items-center justify-center text-green-400 p-4 bg-green-900/50 rounded-lg w-full">
             <CheckCircle size={32} />
-            <p className="mt-2 font-semibold text-center">{message}</p>
+            <p className="mt-2 font-semibold text-center text-sm">{message}</p>
           </div>
         )}
         {status === null && (
-          <p className="text-gray-400 text-center">
-            Ready to scan, {participantName}.<br/>Point your camera at the event's QR code.
+          <p className="text-gray-400 text-center text-sm">
+            {/* FIX: Escaped apostrophe */}
+            Ready to scan, {participantName}.<br/>Point your camera at the event&apos;s QR code.
           </p>
         )}
       </div>

@@ -1,0 +1,125 @@
+Event Attendance Application - Source Code Documentation
+=================================================
+
+📁 Root Files
+------------
+middleware.ts
+- Handles NextJS middleware functionality
+- Manages authentication and route protection
+- Intercepts and processes requests before they reach the route handlers
+
+📁 App Directory (/app)
+----------------------
+globals.css
+- Global CSS styles applied across the entire application
+- Contains base styling and CSS variables
+
+layout.tsx
+- Root layout component
+- Defines the basic structure wrapped around all pages
+- Handles common UI elements like navigation and providers
+
+page.tsx
+- Home page component
+- Landing page of the application
+
+📁 Admin Section (/app/admin)
+----------------------------
+layout.tsx
+- Admin-specific layout wrapper
+- Contains admin navigation and layout structure
+
+page.tsx
+- Admin dashboard page
+- Main interface for administrators
+
+events/[id]/page.tsx
+- Dynamic route for individual event management
+- Shows detailed view and management options for specific events
+
+📁 API Routes (/app/api)
+-----------------------
+auth/
+├── login/route.ts     - Handles user authentication/login
+├── session/route.ts   - Manages user sessions
+└── signup/route.ts    - Handles new user registration
+
+events/
+├── route.ts           - Manages CRUD operations for events
+└── [id]/route.ts      - Handles operations for specific events
+
+participants/
+├── route.ts           - Manages participant data
+├── [id]/route.ts      - Handles specific participant operations
+└── find/route.ts      - Search functionality for participants
+
+attendance/mark/route.ts
+- Handles attendance marking functionality
+- Records participant attendance for events
+
+📁 Public Pages (/app)
+---------------------
+login/page.tsx
+- User login interface
+- Authentication form and logic
+
+student/page.tsx
+- Student dashboard
+- Interface for student users
+
+📁 Components (/components)
+--------------------------
+admin/
+├── EventList.tsx      - Displays list of events for admins
+├── EventQrDisplay.tsx - Shows QR codes for event check-in
+└── ParticipantList.tsx- Lists participants for events
+
+forms/
+├── AddParticipantForm.tsx - Form for adding new participants
+└── CreateEventForm.tsx    - Form for creating new events
+
+student/
+└── StudentEventScanner.tsx- QR code scanner for student check-in
+
+ui/
+├── Button.tsx         - Reusable button component
+├── Input.tsx         - Reusable input component
+├── Modal.tsx         - Popup dialog component
+├── Select.tsx        - Dropdown select component
+├── Spinner.tsx       - Loading indicator component
+└── Toast.tsx         - Notification component
+
+📁 Hooks (/hooks)
+----------------
+useSession.ts
+- Custom hook for session management
+- Handles user authentication state
+
+📁 Library (/lib)
+----------------
+auth.ts
+- Authentication utilities
+- User authorization functions
+
+mongodb.ts
+- MongoDB connection configuration
+- Database utility functions
+
+types.ts
+- TypeScript type definitions
+- Shared interfaces and types
+
+📁 Models (/lib/models)
+----------------------
+Admin.ts         - Admin user model
+Event.ts         - Event data model
+Participant.ts   - Participant data model
+Student.ts       - Student user model
+index.ts         - Model exports
+
+schemas/
+├── AdminSchema.ts      - MongoDB schema for admin users
+├── EventSchema.ts      - MongoDB schema for events
+├── ParticipantSchema.ts- MongoDB schema for participants
+└── StudentSchema.ts    - MongoDB schema for students
+

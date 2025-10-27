@@ -32,9 +32,10 @@ async function getEventDetails(id: string) {
 
     const data = await res.json();
     return data.data;
-  } catch (error: any) {
-    console.error('[getEventDetails] Error:', error);
-    throw error; // Re-throw to be caught by the component
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('[getEventDetails] Error:', message);
+    throw error; // Re-throw to be handled by the caller
   }
 }
 
@@ -42,7 +43,7 @@ async function getEventDetails(id: string) {
 export default async function EventDetailsPage({
   params,
 }: {
-  params: Promise<{ id: string }>; // params is now a Promise in Next.js 15+
+  params: Promise<{ id: string }>;
 }) {
   // Await params to get the actual object
   const resolvedParams = await params;
@@ -58,56 +59,70 @@ export default async function EventDetailsPage({
     );
   }
 
+  // Fetch event data and handle errors separately from rendering
+  let event: IEvent | null = null;
   try {
-    const event = await getEventDetails(id);
-
-    return (
-      <div className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
-          {/* Column 1: Event Details & Participant List */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-              <h1 className="text-3xl font-bold text-orange-500 mb-2">{event.name}</h1>
-              <p className="text-gray-400 text-lg mb-1">
-                {new Date(event.date).toLocaleString('en-US', {
-                  year: 'numeric',
-                  month: '2-digit',
-                  day: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  hour12: true
-                })}
-              </p>
-              <p className="text-gray-500">{event.location}</p>
-            </div>
-
-            <ParticipantList event={event} />
-          </div>
-
-          {/* Column 2: NEW Event QR Code Display */}
-          <div className="lg:col-span-1">
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-              <h2 className="text-2xl font-bold text-white mb-4 text-center">Event Check-in</h2>
-              <EventQrDisplay
-                eventId={String(event._id)}
-                eventName={event.name}
-              />
-            </div>
-          </div>
-
-        </div>
-      </div>
-    );
-  } catch (error: any) {
-    console.error('[EventDetailsPage] Error:', error);
+    event = await getEventDetails(id);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('[EventDetailsPage] Error:', message);
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh]">
         <p className="text-red-500 text-lg mb-2">
-          {error?.message || 'Error loading event'}
+          {message || 'Error loading event'}
         </p>
         <p className="text-gray-500 text-sm">ID: {id}</p>
       </div>
     );
   }
+
+  // Safety: if event is still null for any reason, show an error
+  if (!event) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[50vh]">
+        <p className="text-red-500 text-lg">Event not found</p>
+        <p className="text-gray-500 text-sm">ID: {id}</p>
+      </div>
+    );
+  }
+
+  // Render UI outside of try/catch so rendering errors aren't constructed inside the try/catch block
+  return (
+    <div className="container mx-auto px-4 py-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Column 1: Event Details & Participant List */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+            <h1 className="text-3xl font-bold text-orange-500 mb-2">{event.name}</h1>
+            <p className="text-gray-400 text-lg mb-1">
+              {new Date(event.date).toLocaleString('en-US', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+              })}
+            </p>
+            <p className="text-gray-500">{event.location}</p>
+          </div>
+
+          <ParticipantList event={event} />
+        </div>
+
+        {/* Column 2: NEW Event QR Code Display */}
+        <div className="lg:col-span-1">
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+            <h2 className="text-2xl font-bold text-white mb-4 text-center">Event Check-in</h2>
+            <EventQrDisplay
+              eventId={String(event._id)}
+              eventName={event.name}
+            />
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
 }

@@ -1,7 +1,7 @@
 // src/lib/types.ts
 import { Document, Types } from 'mongoose';
 
-// --- Your Event and Participant interfaces remain unchanged ---
+// --- Updated interfaces to include timestamps ---
 export interface IEvent extends Document {
   _id: Types.ObjectId;
   name: string;
@@ -9,6 +9,8 @@ export interface IEvent extends Document {
   location: string;
   participants: Types.ObjectId[] | IParticipant[];
   description?: string;
+  createdAt?: Date; // FIX: Added createdAt
+  updatedAt?: Date; // FIX: Added updatedAt
 }
 
 export interface IParticipant extends Document {
@@ -17,9 +19,9 @@ export interface IParticipant extends Document {
   email: string;
   eventId: Types.ObjectId | IEvent;
   attended: boolean;
+  createdAt?: Date; // FIX: Added createdAt
+  updatedAt?: Date; // FIX: Added updatedAt
 }
-
-// --- DELETE THE IUser INTERFACE AND REPLACE WITH THESE TWO ---
 
 export interface IStudent extends Document {
   _id: Types.ObjectId;
@@ -28,6 +30,8 @@ export interface IStudent extends Document {
   password: string;
   year?: number;
   group?: string;
+  createdAt?: Date; // FIX: Added createdAt
+  updatedAt?: Date; // FIX: Added updatedAt
 }
 
 export interface IAdmin extends Document {
@@ -38,4 +42,6 @@ export interface IAdmin extends Document {
   rollNumber?: string;
   team?: string;
   adminRole?: string; // e.g., 'Manager', 'Volunteer'
+  createdAt?: Date; // FIX: Added createdAt
+  updatedAt?: Date; // FIX: Added updatedAt
 }

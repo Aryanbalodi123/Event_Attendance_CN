@@ -24,7 +24,7 @@ export function useSession() {
         } else {
           setSession(null);
         }
-      } catch (error) {
+      } catch {
         setSession(null);
       } finally {
         setIsLoading(false);
