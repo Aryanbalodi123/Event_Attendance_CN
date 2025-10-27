@@ -25,11 +25,10 @@ export async function middleware(request: NextRequest) {
   const isAdminRoute = protectedRoutes.admin.some(route => pathname.startsWith(route));
   const isStudentRoute = protectedRoutes.student.some(route => pathname.startsWith(route));
 
-  // --- NEW LOGIC: Redirect from root if not logged in ---
-  if (!session && pathname === '/') {
+  // Always redirect root to login
+  if (pathname === '/') {
     return NextResponse.redirect(new URL('/login', request.url));
   }
-  // --- END NEW LOGIC ---
 
   // 1. If user is logged in
   if (session) {
