@@ -1,6 +1,7 @@
 // src/app/admin/page.tsx
 import React from 'react';
 import EventList from '@components/admin/EventList';
+import SignOutButton from '@/components/ui/SignOutButton';
 import { IEvent } from '@lib/types';
 
 async function getEvents() {
@@ -26,9 +27,12 @@ export default async function AdminDashboardPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-white mb-6">
-        Event Dashboard
-      </h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold text-white">
+          Event Dashboard
+        </h1>
+        <SignOutButton />
+      </div>
       <EventList initialEvents={initialEvents} />
     </div>
   );

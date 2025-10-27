@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { IEvent, IParticipant } from '@/lib/types';
 import Button from '@/components/ui/Button';
+import SignOutButton from '@/components/ui/SignOutButton';
 import Select from '@/components/ui/Select';
 import Spinner from '@/components/ui/Spinner';
 import StudentEventScanner from '@/components/student/StudentEventScanner';
@@ -116,6 +117,11 @@ export default function StudentPage() {
   return (
     <div className="dark min-h-screen bg-black text-gray-300 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
+
+        <div className="flex items-center justify-between mb-4">
+          <div className="text-sm text-gray-400">Signed in as {session?.name}</div>
+          <SignOutButton />
+        </div>
 
         {!participant ? (
           <form
