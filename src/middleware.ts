@@ -1,3 +1,4 @@
+// src/middleware.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { decrypt } from '@/lib/auth';
@@ -8,14 +9,14 @@ const protectedRoutes = {
 };
 
 const authRoutes = ['/login', '/signup'];
+const publicRoutes = ['/']; // Define public routes if needed, now just root
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
-  // Get session cookie
+
   const sessionCookie = request.cookies.get('session')?.value;
   let session = null;
-  
+
   if (sessionCookie) {
     session = await decrypt(sessionCookie);
   }
@@ -23,6 +24,12 @@ export async function middleware(request: NextRequest) {
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
   const isAdminRoute = protectedRoutes.admin.some(route => pathname.startsWith(route));
   const isStudentRoute = protectedRoutes.student.some(route => pathname.startsWith(route));
+
+  // --- NEW LOGIC: Redirect from root if not logged in ---
+  if (!session && pathname === '/') {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+  // --- END NEW LOGIC ---
 
   // 1. If user is logged in
   if (session) {
@@ -41,26 +48,28 @@ export async function middleware(request: NextRequest) {
     if (session.role === 'student' && isAdminRoute) {
       return NextResponse.redirect(new URL('/student', request.url));
     }
-    
-    // 1d. User is authenticated and has correct role. Continue.
+
+    // 1d. User is authenticated and accessing allowed routes (including '/'). Continue.
     return NextResponse.next();
   }
 
   // 2. If user is NOT logged in and trying to access a protected route
   if (!session && (isAdminRoute || isStudentRoute)) {
-    // Redirect to login, but preserve the intended URL
     const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('redirect', pathname);
+    loginUrl.searchParams.set('redirect', pathname); // Keep redirect param for protected routes
     return NextResponse.redirect(loginUrl);
   }
 
-  // 3. All other cases (e.g., public home page), allow access
+  // 3. Allow access to auth routes and any explicitly public routes if not logged in
+  // (The root '/' case is handled above)
   return NextResponse.next();
 }
 
 // Config matcher to run middleware on specific paths
 export const config = {
   matcher: [
+    // --- ADDED ROOT PATH '/' ---
+    '/',
     '/admin/:path*',
     '/student/:path*',
     '/login',
