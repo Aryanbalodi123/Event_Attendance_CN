@@ -11,10 +11,15 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 // A simple card for displaying event info
-const EventCard: React.FC<{ event: IEvent }> = ({ event }) => {
-  // FIX: Removed useState and useEffect for formattedDate
-  // const [formattedDate, setFormattedDate] = useState<string>('');
-  // useEffect(() => { ... }, [event.date]);
+const EventCard: React.FC<{ event: IEvent; onDelete: (eventId: string) => void }> = ({ event, onDelete }) => {
+  // Handle delete click with event bubbling prevention
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (window.confirm('Are you sure you want to delete this event?')) {
+      onDelete(String(event._id));
+    }
+  };
 
   // FIX: Format the date directly here for rendering
   const formattedDate = event.date
@@ -46,13 +51,32 @@ const EventCard: React.FC<{ event: IEvent }> = ({ event }) => {
   return (
     // Use the guaranteed string eventId for the link
     <Link href={`/admin/events/${eventId}`}>
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-lg hover:shadow-orange-500/10 hover:border-orange-500 transition-all duration-200 cursor-pointer">
+      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 shadow-lg hover:shadow-orange-500/10 hover:border-orange-500 transition-all duration-200 cursor-pointer relative">
         <h3 className="text-xl font-semibold text-orange-500 mb-2">{event.name}</h3>
         {/* Render the directly formatted date */}
         <p className="text-gray-400">{formattedDate}</p>
         <p className="text-gray-500">{event.location}</p>
-        {/* Removed debug ID display */}
-        {/* <p className="text-xs text-gray-600 mt-2">ID: {eventId}</p> */}
+        {/* Delete button positioned absolutely in top-right corner */}
+        <button
+          onClick={handleDeleteClick}
+          className="absolute top-2 right-2 p-2 text-red-500 hover:text-red-400 bg-gray-800 rounded-full hover:bg-gray-700 transition-all"
+          title="Delete event"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            />
+          </svg>
+        </button>
       </div>
     </Link>
   );
@@ -67,6 +91,24 @@ const EventList: React.FC<EventListProps> = ({ initialEvents }) => {
   const [events, setEvents] = useState<IEvent[]>(initialEvents);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
+
+  const handleDeleteEvent = async (eventId: string) => {
+    try {
+      const response = await fetch(`/api/events/${eventId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete event');
+      }
+
+      // Remove the event from the local state
+      setEvents(events.filter(event => String(event._id) !== eventId));
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      alert('Failed to delete event. Please try again.');
+    }
+  };
 
   // Debug: Log initial events (keep if helpful)
   useEffect(() => {
@@ -115,7 +157,7 @@ const EventList: React.FC<EventListProps> = ({ initialEvents }) => {
             if (!event._id) {
                 console.warn('Event missing _id in EventList map:', event);
             }
-            return <EventCard key={key} event={event} />;
+            return <EventCard key={key} event={event} onDelete={handleDeleteEvent} />;
           })}
         </div>
       )}

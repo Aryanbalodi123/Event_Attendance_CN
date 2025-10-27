@@ -30,14 +30,14 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center"
+          className="fixed inset-0 z-50 flex items-center justify-center px-2 sm:px-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
           {/* Backdrop */}
           <motion.div
-            className="absolute inset-0 bg-black/50 backdrop-blur-md"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={onClose}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -47,25 +47,26 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
 
           {/* Modal Panel */}
           <motion.div
-            className="relative z-10 w-full max-w-lg rounded-2xl bg-gray-900 border border-gray-800 shadow-xl"
-            initial={{ scale: 0.9, opacity: 0 }}
+            className="relative z-10 w-full max-w-lg rounded-3xl bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 border border-gray-700 shadow-2xl overflow-hidden"
+            initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 28 }}
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-800">
-              <h3 className="text-lg font-semibold text-white">{title}</h3>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-700 bg-gray-900/80">
+              <h3 className="text-xl font-bold text-white tracking-tight">{title}</h3>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-white transition-colors"
+                className="rounded-full p-2 text-gray-400 hover:text-white hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
+                aria-label="Close modal"
               >
-                <X size={20} />
+                <X size={22} />
               </button>
             </div>
 
             {/* Content */}
-            <div className="p-6">
+            <div className="p-8 bg-gray-900/90">
               {children}
             </div>
           </motion.div>

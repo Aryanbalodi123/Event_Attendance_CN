@@ -53,41 +53,46 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSuccess, onClose })
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {error && <p className="text-red-500 text-sm">{error}</p>}
-      <Input
-        id="name"
-        label="Event Name"
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        required
-      />
-      <Input
-        id="date"
-        label="Date"
-        type="datetime-local"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-        required
-      />
-      <Input
-        id="location"
-        label="Location"
-        type="text"
-        value={location}
-        onChange={(e) => setLocation(e.target.value)}
-        required
-      />
-      <div className="flex justify-end gap-2 pt-4">
-        <Button type="button" variant="secondary" onClick={onClose} disabled={isLoading}>
-          Cancel
-        </Button>
-        <Button type="submit" variant="primary" disabled={isLoading}>
-          {isLoading ? 'Creating...' : 'Create Event'}
-        </Button>
-      </div>
-    </form>
+    <div className="bg-gray-900/80 rounded-2xl shadow-lg p-2 sm:p-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <h2 className="text-lg font-bold text-white mb-2 tracking-tight text-center">Create New Event</h2>
+        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+        <div className="grid grid-cols-1 gap-5">
+          <Input
+            id="name"
+            label="Event Name"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+          <Input
+            id="date"
+            label="Date & Time"
+            type="datetime-local"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            required
+          />
+          <Input
+            id="location"
+            label="Location"
+            type="text"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            required
+          />
+        </div>
+        <div className="flex justify-end gap-3 pt-2">
+          <Button type="button" variant="secondary" onClick={onClose} disabled={isLoading}>
+            Cancel
+          </Button>
+          <Button type="submit" variant="primary" disabled={isLoading}>
+            {isLoading ? 'Creating...' : 'Create Event'}
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 };
 
