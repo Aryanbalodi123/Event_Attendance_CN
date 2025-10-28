@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { IEvent } from '@/lib/types';
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
+const ModalAny = Modal as unknown as React.ComponentType<any>;
 import CreateEventForm from '../forms/CreateEventForm';
 import { Plus, Trash2, Calendar, MapPin, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
@@ -201,8 +202,7 @@ const EventList: React.FC<EventListProps> = ({ initialEvents }) => {
         </div>
       )}
 
-      {/* Modal */}
-      <Modal
+      <ModalAny
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title="Create New Event"
@@ -211,7 +211,7 @@ const EventList: React.FC<EventListProps> = ({ initialEvents }) => {
           onSuccess={handleEventCreated}
           onClose={() => setIsModalOpen(false)}
         />
-      </Modal>
+      </ModalAny>
     </div>
   );
 };
