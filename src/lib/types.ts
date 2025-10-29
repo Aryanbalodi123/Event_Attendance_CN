@@ -1,7 +1,7 @@
 // src/lib/types.ts
 import { Document, Types } from 'mongoose';
 
-// --- Updated interfaces to include timestamps ---
+// --- Your Event and Participant interfaces remain unchanged ---
 export interface IEvent extends Document {
   _id: Types.ObjectId;
   name: string;
@@ -9,8 +9,8 @@ export interface IEvent extends Document {
   location: string;
   participants: Types.ObjectId[] | IParticipant[];
   description?: string;
-  createdAt?: Date; // FIX: Added createdAt
-  updatedAt?: Date; // FIX: Added updatedAt
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface IParticipant extends Document {
@@ -19,29 +19,39 @@ export interface IParticipant extends Document {
   email: string;
   eventId: Types.ObjectId | IEvent;
   attended: boolean;
-  createdAt?: Date; // FIX: Added createdAt
-  updatedAt?: Date; // FIX: Added updatedAt
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface IStudent extends Document {
   _id: Types.ObjectId;
   name: string;
   email: string;
-  password: string;
+  password?: string;
   year?: number;
   group?: string;
-  createdAt?: Date; // FIX: Added createdAt
-  updatedAt?: Date; // FIX: Added updatedAt
+  createdAt?: Date;
+  updatedAt?: Date;
+  
+  // --- Password reset fields ---
+  resetToken?: string;
+  resetTokenExpiry?: Date;
+  lastPasswordReset?: Date;
 }
 
 export interface IAdmin extends Document {
   _id: Types.ObjectId;
   name: string;
   email: string;
-  password: string;
+  password?: string;
   rollNumber?: string;
   team?: string;
-  adminRole?: string; // e.g., 'Manager', 'Volunteer'
-  createdAt?: Date; // FIX: Added createdAt
-  updatedAt?: Date; // FIX: Added updatedAt
+  adminRole?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+
+  // --- Password reset fields ---
+  resetToken?: string;
+  resetTokenExpiry?: Date;
+  lastPasswordReset?: Date;
 }

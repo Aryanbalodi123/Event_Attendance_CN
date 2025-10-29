@@ -43,8 +43,8 @@ export async function POST(request: Request) {
         group,
       });
 
-      // Create session
-      await createSession(newStudent._id, 'student', newStudent.name, newStudent.email);
+      // --- FIX: Convert ObjectId to string ---
+      await createSession(newStudent._id.toString(), 'student', newStudent.name, newStudent.email);
       
       return NextResponse.json(
         { success: true, data: { id: newStudent._id, name: newStudent.name, email: newStudent.email, role: 'student' } },
@@ -73,8 +73,8 @@ export async function POST(request: Request) {
         adminRole,
       });
 
-      // Create session
-      await createSession(newAdmin._id, 'admin', newAdmin.name, newAdmin.email);
+      // --- FIX: Convert ObjectId to string ---
+      await createSession(newAdmin._id.toString(), 'admin', newAdmin.name, newAdmin.email);
       
       return NextResponse.json(
         { success: true, data: { id: newAdmin._id, name: newAdmin.name, email: newAdmin.email, role: 'admin' } },

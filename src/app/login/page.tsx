@@ -1,13 +1,15 @@
 "use client";
 
-import React, { useEffect, /* useRef, */ useState } from "react"; // Removed useRef
+import React, { useEffect, useState } from "react";
 import { useRouter } from 'next/navigation';
 import Spinner from '@/components/ui/Spinner';
+import Link from 'next/link'; // <-- IMPORT LINK
 
 type Role = 'student' | 'admin';
 
 // Defined SignupBody type
 type SignupBody = {
+  // ... (rest of type)
   role: Role;
   name: string;
   email: string;
@@ -21,31 +23,24 @@ type SignupBody = {
 
 
 export default function LoginPage() {
-  // const canvasRef = useRef<HTMLCanvasElement | null>(null); // Removed canvasRef
   const router = useRouter();
 
   const [role, setRole] = useState<Role>('student');
 
-  // Common fields
+  // ... (rest of your state)
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-
-  // Student fields
   const [year, setYear] = useState('');
   const [group, setGroup] = useState('');
-
-  // Admin fields
   const [rollNumber, setRollNumber] = useState('');
   const [team, setTeam] = useState('');
   const [adminRole, setAdminRole] = useState('');
-
-  // UI state
   const [isLoginView, setIsLoginView] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Load Poppins font
+  // ... (rest of your useEffects and handlers)
   useEffect(() => {
      const link = document.createElement("link");
     link.href =
@@ -57,8 +52,6 @@ export default function LoginPage() {
       if (link.parentNode) document.head.removeChild(link);
     };
   }, []);
-
-  // REMOVED the useEffect hook for canvas animation
 
   const handleLogin = async () => {
     setIsLoading(true);
@@ -158,16 +151,9 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ fontFamily: '"Poppins", sans-serif' }}>
-      {/* Gradient Background - FIX: Used bg-linear-to-b */}
       <div className="absolute inset-0 bg-linear-to-b from-black via-zinc-900 to-orange-950" />
-
-      {/* REMOVED Moving Balls Canvas */}
-      {/* <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" /> */}
-
-      {/* Content Layer */}
       <div className="relative z-10 min-h-screen flex flex-col">
-         {/* Navigation */}
-        <nav className="flex items-center justify-between px-8 py-6">
+         <nav className="flex items-center justify-between px-8 py-6">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
               <div className="w-5 h-5 bg-orange-600 rounded" />
@@ -185,11 +171,8 @@ export default function LoginPage() {
           </button>
         </nav>
 
-        {/* Login Form */}
         <div className="flex-1 flex items-center justify-center px-4 py-12">
           <form onSubmit={handleSubmit} className="bg-black bg-opacity-60 backdrop-blur-sm rounded-2xl p-8 w-full max-w-md border border-orange-900 border-opacity-50">
-
-             {/* --- ROLE SWITCHER --- */}
              <div className="flex w-full mb-6">
                <button
                  type="button"
@@ -223,8 +206,8 @@ export default function LoginPage() {
             </h2>
 
             <div className="space-y-4">
-              {/* --- SIGNUP-ONLY (COMMON) --- */}
-                {!isLoginView && (
+              {/* ... (rest of form inputs) ... */}
+              {!isLoginView && (
                  <div>
                    <label htmlFor="name" className="sr-only">Full Name</label>
                    <input
@@ -239,8 +222,6 @@ export default function LoginPage() {
                    />
                  </div>
                )}
-
-              {/* --- ALWAYS VISIBLE --- */}
                  <div>
                  <label htmlFor="identifier" className="sr-only">Email</label>
                  <input
@@ -254,7 +235,6 @@ export default function LoginPage() {
                    required
                  />
                </div>
-
                <div>
                  <label htmlFor="password" className="sr-only">Password</label>
                  <input
@@ -268,8 +248,6 @@ export default function LoginPage() {
                    required
                  />
                </div>
-
-              {/* --- STUDENT SIGNUP FIELDS --- */}
                 {role === 'student' && !isLoginView && (
                  <>
                    <div>
@@ -298,8 +276,6 @@ export default function LoginPage() {
                    </div>
                  </>
                )}
-
-              {/* --- ADMIN SIGNUP FIELDS --- */}
                 {role === 'admin' && !isLoginView && (
                  <>
                    <div>
@@ -356,9 +332,13 @@ export default function LoginPage() {
 
             {/* Footer Links */}
             <div className="mt-6 space-y-3 text-center">
-              <a href="#" className="text-orange-400 hover:text-orange-300 text-sm block transition">
-                Forgot password?
-              </a>
+              {/* --- FIX: UPDATED THIS LINK --- */}
+              <Link href="/forgot-password" legacyBehavior>
+                <a className="text-orange-400 hover:text-orange-300 text-sm block transition">
+                  Forgot password?
+                </a>
+              </Link>
+              {/* ------------------------- */}
               <p className="text-gray-400 text-sm">
                 {isLoginView ? "Need a new account?" : "Already have an account?"}{" "}
                 <button

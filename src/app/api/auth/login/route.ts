@@ -1,3 +1,5 @@
+// src/app/api/auth/login/route.ts
+
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Student from '@/lib/models/Student'; // Import Student
@@ -18,20 +20,30 @@ export async function POST(request: Request) {
       );
     }
 
-    // FIX 1: The type for 'user' was corrected.
-    // 'null' is now part of the union, not the intersection.
+
     let user: ((IStudent | IAdmin) & { password?: string }) | null = null;
 
     // Find the user in the correct collection
+    console.log(`[LOGIN] Attempting login for ${email} as ${role}`);
+    
     if (role === 'student') {
+      // --- THIS IS THE FIX ---
       user = await Student.findOne({ email: email.toLowerCase() }).select('+password');
+      // ----------------------
+      console.log(`[LOGIN] Student lookup result: ${user ? 'Found' : 'Not found'}`);
+      if (user) console.log(`[LOGIN] Password field present: ${!!user.password}`);
     } else if (role === 'admin') {
+      // --- THIS IS THE FIX ---
       user = await Admin.findOne({ email: email.toLowerCase() }).select('+password');
+      // ----------------------
+      console.log(`[LOGIN] Admin lookup result: ${user ? 'Found' : 'Not found'}`);
+      if (user) console.log(`[LOGIN] Password field present: ${!!user.password}`);
     } else {
       return NextResponse.json({ success: false, error: 'Invalid role' }, { status: 400 });
     }
 
     if (!user || !user.password) { // Check for user AND password
+      console.log(`[LOGIN] Auth failed - ${!user ? 'User not found' : 'Password field missing'}`);
       return NextResponse.json(
         { success: false, error: 'Invalid email or password' },
         { status: 401 }
@@ -39,7 +51,9 @@ export async function POST(request: Request) {
     }
 
     // Compare the password
+    console.log('[LOGIN] Attempting password comparison');
     const isMatch = await bcrypt.compare(password, user.password);
+    console.log(`[LOGIN] Password comparison result: ${isMatch ? 'Match' : 'No match'}`);
     if (!isMatch) {
       return NextResponse.json(
         { success: false, error: 'Invalid email or password' },

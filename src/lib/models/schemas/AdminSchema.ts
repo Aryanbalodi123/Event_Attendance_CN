@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { IAdmin } from '../../types'; // We will create this type
+import { IAdmin } from '../../types';
 
 const AdminSchema = new mongoose.Schema<IAdmin>(
   {
@@ -19,27 +19,45 @@ const AdminSchema = new mongoose.Schema<IAdmin>(
       type: String,
       required: [true, 'Password is required.'],
       minlength: [6, 'Password must be at least 6 characters.'],
+      select: false, // Hide password by default on queries
     },
-    // Your new fields
     rollNumber: {
       type: String,
       trim: true,
       unique: true,
-      sparse: true, // Allows null/empty values to not violate unique
+      sparse: true,
     },
     team: {
       type: String,
       trim: true,
     },
-    adminRole: { // Renamed from 'role' to avoid confusion
+    adminRole: {
       type: String,
       trim: true,
       default: 'Member',
     },
+    
+    // --- NEW FIELDS FOR PASSWORD RESET ---
+    resetToken: {
+      type: String,
+      select: false, // Hide by default
+    },
+    resetTokenExpiry: {
+      type: Date,
+      select: false, // Hide by default
+    },
+    lastPasswordReset: {
+      type: Date,
+      select: false, // Hide by default
+    },
+    // -------------------------------------
   },
   {
     timestamps: true,
   }
 );
+
+// Remove the pre-find hooks that were causing issues with password selection
+// The select:false in the schema is sufficient for security
 
 export default AdminSchema;
