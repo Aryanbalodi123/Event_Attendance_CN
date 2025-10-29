@@ -1,4 +1,3 @@
-// src/components/forms/CreateEventForm.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -42,8 +41,8 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSuccess, onClose })
         throw new Error(result.error || 'Failed to create event');
       }
 
-      onSuccess(result.data); // Pass the new event data back
-      onClose(); // Close the modal
+      onSuccess(result.data);
+      onClose();
 
     } catch (err) {
       setError((err as Error).message);
@@ -53,43 +52,86 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSuccess, onClose })
   };
 
   return (
-    <div className="bg-gray-900/80 rounded-2xl shadow-lg p-2 sm:p-4">
+    <div className="bg-black rounded-2xl shadow-2xl p-6 sm:p-8 border-2 border-orange-500">
       <form onSubmit={handleSubmit} className="space-y-6">
-        <h2 className="text-lg font-bold text-white mb-2 tracking-tight text-center">Create New Event</h2>
-        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-        <div className="grid grid-cols-1 gap-5">
-          <Input
-            id="name"
-            label="Event Name"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-          <Input
-            id="date"
-            label="Date & Time"
-            type="datetime-local"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
-          />
-          <Input
-            id="location"
-            label="Location"
-            type="text"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            required
-          />
+        {/* Header with orange accent */}
+        <div className="border-b-2 border-orange-500 pb-4">
+          <h2 className="text-2xl font-bold text-orange-500 tracking-tight text-center">
+            Create New Event
+          </h2>
         </div>
-        <div className="flex justify-end gap-3 pt-2">
-          <Button type="button" variant="secondary" onClick={onClose} disabled={isLoading}>
+
+        {/* Error message */}
+        {error && (
+          <div className="bg-red-900/30 border border-red-500 rounded-lg p-3">
+            <p className="text-red-400 text-sm text-center">{error}</p>
+          </div>
+        )}
+
+        {/* Form inputs with enhanced styling */}
+        <div className="grid grid-cols-1 gap-6">
+          <div>
+            <label htmlFor="name" className="block text-orange-400 text-sm font-semibold mb-2">
+              Event Name
+            </label>
+            <input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              className="w-full bg-gray-900 text-white border-2 border-orange-500 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-500/50 transition-all"
+              placeholder="Enter event name"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="date" className="block text-orange-400 text-sm font-semibold mb-2">
+              Date & Time
+            </label>
+            <input
+              id="date"
+              type="datetime-local"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              required
+              className="w-full bg-gray-900 text-white border-2 border-orange-500 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-500/50 transition-all"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="location" className="block text-orange-400 text-sm font-semibold mb-2">
+              Location
+            </label>
+            <input
+              id="location"
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              required
+              className="w-full bg-gray-900 text-white border-2 border-orange-500 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-500/50 transition-all"
+              placeholder="Enter event location"
+            />
+          </div>
+        </div>
+
+        {/* Action buttons */}
+        <div className="flex justify-end gap-4 pt-4">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isLoading}
+            className="px-6 py-3 bg-gray-800 text-white border-2 border-gray-600 rounded-lg font-semibold hover:bg-gray-700 hover:border-gray-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             Cancel
-          </Button>
-          <Button type="submit" variant="primary" disabled={isLoading}>
+          </button>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="px-6 py-3 bg-orange-500 text-black border-2 border-orange-600 rounded-lg font-semibold hover:bg-orange-600 hover:border-orange-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/30"
+          >
             {isLoading ? 'Creating...' : 'Create Event'}
-          </Button>
+          </button>
         </div>
       </form>
     </div>

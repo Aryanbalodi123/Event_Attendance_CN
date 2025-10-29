@@ -1,14 +1,16 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { IEvent } from '@/lib/types';
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
 const ModalAny = Modal as unknown as React.ComponentType<any>;
 import CreateEventForm from '../forms/CreateEventForm';
-import { Plus, Trash2, Calendar, MapPin, ArrowRight } from 'lucide-react';
+import { Plus, Trash2, Calendar, MapPin, ArrowRight, Filter } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+
+type EventFilter = 'all' | 'upcoming' | 'today' | 'past';
 
 // Enhanced EventCard with modern glassmorphism design
 const EventCard: React.FC<{ event: IEvent; onDelete: (eventId: string) => void }> = ({ event, onDelete }) => {
@@ -19,17 +21,18 @@ const EventCard: React.FC<{ event: IEvent; onDelete: (eventId: string) => void }
       onDelete(String(event._id));
     }
   };
+
   useEffect(() => {
-      const link = document.createElement('link');
-      link.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap';
-      link.rel = 'stylesheet';
-      document.head.appendChild(link);
-      document.body.style.fontFamily = "'Poppins', sans-serif";
-      
-      return () => {
-        document.head.removeChild(link);
-      };
-    }, []);
+    const link = document.createElement('link');
+    link.href = 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap';
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
+    document.body.style.fontFamily = "'Poppins', sans-serif";
+    
+    return () => {
+      document.head.removeChild(link);
+    };
+  }, []);
 
   const formattedDate = event.date
     ? new Date(event.date).toLocaleString('en-US', {
@@ -107,6 +110,38 @@ const EventCard: React.FC<{ event: IEvent; onDelete: (eventId: string) => void }
   );
 };
 
+// Filter Button Component
+const FilterButton: React.FC<{
+  label: string;
+  isActive: boolean;
+  onClick: () => void;
+  count: number;
+}> = ({ label, isActive, onClick, count }) => (
+  <button
+    onClick={onClick}
+    className={`
+      relative px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 text-sm
+      ${isActive 
+        ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/30 scale-105' 
+        : 'bg-gray-800/50 text-gray-400 hover:bg-gray-800/80 hover:text-gray-300 border border-gray-700/50'
+      }
+    `}
+  >
+    <span className="flex items-center gap-2">
+      {label}
+      <span className={`
+        px-2 py-0.5 rounded-full text-xs font-bold
+        ${isActive 
+          ? 'bg-white/20 text-white' 
+          : 'bg-gray-700/50 text-gray-500'
+        }
+      `}>
+        {count}
+      </span>
+    </span>
+  </button>
+);
+
 interface EventListProps {
   initialEvents: IEvent[];
 }
@@ -114,7 +149,57 @@ interface EventListProps {
 const EventList: React.FC<EventListProps> = ({ initialEvents }) => {
   const [events, setEvents] = useState<IEvent[]>(initialEvents);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<EventFilter>('all');
   const router = useRouter();
+
+  // Function to categorize event based on date
+  const categorizeEvent = (eventDate: string): EventFilter => {
+    const now = new Date();
+    const date = new Date(eventDate);
+    
+    // Remove time component for date comparison
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const eventDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    
+    // Check if event is today
+    if (eventDay.getTime() === today.getTime()) {
+      return 'today';
+    }
+    
+    // Check if event is in the past
+    if (eventDay < today) {
+      return 'past';
+    }
+    
+    // Event is in the future
+    return 'upcoming';
+  };
+
+  // Filter and count events
+  const { filteredEvents, counts } = useMemo(() => {
+    const counts = {
+      all: events.length,
+      upcoming: 0,
+      today: 0,
+      past: 0
+    };
+
+    events.forEach(event => {
+      if (event.date) {
+        const category = categorizeEvent(event.date);
+        counts[category]++;
+      }
+    });
+
+    const filtered = events.filter(event => {
+      if (!event.date) return activeFilter === 'all';
+      
+      const category = categorizeEvent(event.date);
+      return activeFilter === 'all' || category === activeFilter;
+    });
+
+    return { filteredEvents: filtered, counts };
+  }, [events, activeFilter]);
 
   const handleDeleteEvent = async (eventId: string) => {
     try {
@@ -151,13 +236,9 @@ const EventList: React.FC<EventListProps> = ({ initialEvents }) => {
 
   return (
     <div className="font-['Poppins',sans-serif] min-h-screen">
-      {/* Header section with gradient */}
-      <div className="mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            
-            
-          </div>
+      {/* Header section with Create Event button */}
+      <div className="mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-4">
           <Button 
             onClick={() => setIsModalOpen(true)}
             className="group relative px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-orange-500/50 transition-all duration-300 hover:scale-105"
@@ -170,8 +251,46 @@ const EventList: React.FC<EventListProps> = ({ initialEvents }) => {
         </div>
       </div>
 
+      {/* Filter Section */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 bg-orange-500/10 rounded-lg">
+            <Filter className="h-5 w-5 text-orange-400" />
+          </div>
+          <h2 className="text-lg font-semibold text-gray-200">Filter Events</h2>
+        </div>
+
+        {/* Filter Buttons */}
+        <div className="flex flex-wrap gap-3">
+          <FilterButton
+            label="All Events"
+            isActive={activeFilter === 'all'}
+            onClick={() => setActiveFilter('all')}
+            count={counts.all}
+          />
+          <FilterButton
+            label="Upcoming"
+            isActive={activeFilter === 'upcoming'}
+            onClick={() => setActiveFilter('upcoming')}
+            count={counts.upcoming}
+          />
+          <FilterButton
+            label="Today"
+            isActive={activeFilter === 'today'}
+            onClick={() => setActiveFilter('today')}
+            count={counts.today}
+          />
+          <FilterButton
+            label="Past"
+            isActive={activeFilter === 'past'}
+            onClick={() => setActiveFilter('past')}
+            count={counts.past}
+          />
+        </div>
+      </div>
+
       {/* Events grid or empty state */}
-      {events.length === 0 ? (
+      {filteredEvents.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 px-4">
           <div className="relative">
             <div className="absolute inset-0 bg-orange-500/20 blur-3xl rounded-full" />
@@ -179,9 +298,14 @@ const EventList: React.FC<EventListProps> = ({ initialEvents }) => {
               <div className="inline-flex p-4 bg-orange-500/10 rounded-2xl mb-6">
                 <Calendar className="h-12 w-12 text-orange-400" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-200 mb-3">No Events Yet</h3>
+              <h3 className="text-2xl font-bold text-gray-200 mb-3">
+                {activeFilter === 'all' ? 'No Events Yet' : `No ${activeFilter.charAt(0).toUpperCase() + activeFilter.slice(1)} Events`}
+              </h3>
               <p className="text-gray-400 mb-6 max-w-md mx-auto font-medium">
-                Get started by creating your first event. Click the button above to begin!
+                {activeFilter === 'all' 
+                  ? 'Get started by creating your first event. Click the button above to begin!'
+                  : `There are no ${activeFilter} events at the moment. Try a different filter or create a new event.`
+                }
               </p>
               <div className="inline-flex items-center gap-2 text-orange-400 text-sm font-semibold">
                 <span>Ready to create?</span>
@@ -192,7 +316,7 @@ const EventList: React.FC<EventListProps> = ({ initialEvents }) => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {events.map((event, idx) => {
+          {filteredEvents.map((event, idx) => {
             const key = event._id ? String(event._id) : `missing-id-${event.name ?? idx}`;
             if (!event._id) {
               console.warn('Event missing _id in EventList map:', event);
