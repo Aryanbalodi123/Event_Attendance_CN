@@ -44,7 +44,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
 
           {/* Modal Panel */}
           <motion.div
-            className="relative z-10 w-full max-w-2xl rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-700/50 shadow-2xl overflow-hidden"
+            className="relative z-10 w-full max-w-2xl rounded-2xl  overflow-hidden"
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
@@ -52,27 +52,10 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
             style={{ fontFamily: "'Poppins', sans-serif" }}
           >
             {/* Decorative gradient overlay */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500"></div>
-            
-            {/* Header */}
-            <div className="relative flex items-center justify-between px-8 py-6 border-b border-slate-700/50 bg-slate-900/90 backdrop-blur-sm">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg">
-                  <Calendar className="w-5 h-5 text-white" />
-                </div>
-                <h3 className="text-2xl font-semibold text-white tracking-tight">{title}</h3>
-              </div>
-              <button
-                onClick={onClose}
-                className="group rounded-xl p-2.5 text-slate-400 hover:text-white hover:bg-slate-800/80 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                aria-label="Close modal"
-              >
-                <X className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-              </button>
-            </div>
+      
 
             {/* Content */}
-            <div className="p-8 bg-slate-900/50 backdrop-blur-sm">
+            <div >
               {children}
             </div>
           </motion.div>
