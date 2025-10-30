@@ -1,10 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { IParticipant } from '@lib/types';
-
-// Note: This component uses raw <input> and <button> elements to match the
-// styling of CreateEventForm, rather than the custom <Input> or <Button> components.
+import { IParticipant } from '@lib/types'; // Using your main types file
 
 interface AddParticipantFormProps {
   eventId: string;
@@ -19,6 +16,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
 }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [rollNumber, setRollNumber] = useState(''); // <-- ADDED STATE
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,14 +25,13 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
     setIsLoading(true);
     setError(null);
 
-    // Added validation, similar to your CreateEventForm
-    if (!name || !email) {
-      setError('Name and Email are required.');
+    // --- UPDATED VALIDATION ---
+    if (!name || !email || !rollNumber) {
+      setError('Name, Email, and Roll Number are required.');
       setIsLoading(false);
       return;
     }
     
-    // Basic email validation
     if (!/\S+@\S+\.\S+/.test(email)) {
       setError('Please enter a valid email address.');
       setIsLoading(false);
@@ -45,7 +42,8 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
       const res = await fetch('/api/participants', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, eventId }),
+        // --- UPDATED BODY ---
+        body: JSON.stringify({ name, email, rollNumber, eventId }),
       });
 
       const result = await res.json();
@@ -65,26 +63,22 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
   };
 
   return (
-    // Copied root style from CreateEventForm
+    // --- THIS DIV WRAPPER IS NOW ADDED (like CreateEventForm) ---
     <div className="bg-black rounded-2xl shadow-2xl p-6 sm:p-8 border-2 border-orange-500">
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Header style from CreateEventForm, text updated */}
         <div className="border-b-2 border-orange-500 pb-4">
           <h2 className="text-2xl font-bold text-orange-500 tracking-tight text-center">
-            Add New Participant
+            Register New Attendee
           </h2>
         </div>
 
-        {/* Error message style from CreateEventForm */}
         {error && (
           <div className="bg-red-900/30 border border-red-500 rounded-lg p-3">
             <p className="text-red-400 text-sm text-center">{error}</p>
           </div>
         )}
 
-        {/* Form inputs style from CreateEventForm */}
         <div className="grid grid-cols-1 gap-6">
-          {/* Participant Name Input */}
           <div>
             <label htmlFor="name" className="block text-orange-400 text-sm font-semibold mb-2">
               Participant Name
@@ -100,7 +94,22 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
             />
           </div>
 
-          {/* Participant Email Input */}
+          {/* --- NEW ROLL NUMBER FIELD --- */}
+          <div>
+            <label htmlFor="rollNumber" className="block text-orange-400 text-sm font-semibold mb-2">
+              Roll Number
+            </label>
+            <input
+              id="rollNumber"
+              type="text"
+              value={rollNumber}
+              onChange={(e) => setRollNumber(e.target.value)}
+              required
+              className="w-full bg-gray-900 text-white border-2 border-orange-500 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-500/50 transition-all"
+              placeholder="Enter roll number"
+            />
+          </div>
+
           <div>
             <label htmlFor="email" className="block text-orange-400 text-sm font-semibold mb-2">
               Email Address
@@ -117,7 +126,6 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
           </div>
         </div>
 
-        {/* Action buttons style from CreateEventForm */}
         <div className="flex justify-end gap-4 pt-4">
           <button
             type="button"
@@ -132,8 +140,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
             disabled={isLoading}
             className="px-6 py-3 bg-orange-500 text-black border-2 border-orange-600 rounded-lg font-semibold hover:bg-orange-600 hover:border-orange-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-orange-500/30"
           >
-            {/* Text updated for participant context */}
-            {isLoading ? 'Adding...' : 'Add Participant'}
+            {isLoading ? 'Registering...' : 'Register Attendee'}
           </button>
         </div>
       </form>

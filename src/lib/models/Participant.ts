@@ -1,3 +1,4 @@
+// lib/models/Participant.ts
 import mongoose from 'mongoose';
 import { IParticipant } from '../types';
 
@@ -14,6 +15,13 @@ const ParticipantSchema = new mongoose.Schema<IParticipant>(
       trim: true,
       lowercase: true,
     },
+    // --- ADDED THIS FIELD ---
+    rollNumber: {
+      type: String,
+      required: [true, 'Roll number is required.'],
+      trim: true,
+    },
+    // -------------------------
     eventId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Event',

@@ -32,9 +32,6 @@ export async function GET(
   try {
     await connectDB();
 
-    // Fetch and populate. Use generic type assertion for populated result.
-    // `.lean()` returns plain JS objects, not Mongoose documents.
-    // FIX: Define a type for the populated event instead of 'any'
     const event = await Event.findById(id)
       .populate<{ participants: IParticipant[] }>('participants') // Specify populated field type
       .lean(); // Use lean for performance if not modifying
@@ -46,18 +43,19 @@ export async function GET(
       );
     }
 
-    // Transform MongoDB ObjectIds to strings for JSON response
-    // We already have types from lean() and populate<>
     const formattedEvent = {
       ...event,
       _id: event._id?.toString(),
       date: event.date?.toISOString(), // Assuming date is stored as Date
-      participants: (event.participants || []).map((p: IParticipant) => ({ // FIX: Use IParticipant type
+      participants: (event.participants || []).map((p: IParticipant) => ({
         _id: p._id?.toString(),
         name: p.name,
         email: p.email,
+        // --- THIS LINE IS CORRECT ---
+        rollNumber: p.rollNumber,
+        // ---------------------------
         attended: p.attended,
-        createdAt: p.createdAt?.toISOString() // Ensure createdAt is Date in schema for this
+        createdAt: p.createdAt?.toISOString()
       }))
     };
 
@@ -65,11 +63,11 @@ export async function GET(
       { success: true, data: formattedEvent },
       { status: 200 }
     );
-  } catch (error: unknown) { // FIX: Changed any to unknown
+  } catch (error: unknown) {
     const message = (error instanceof Error) ? error.message : 'An unknown error occurred';
-    console.error('[GET /api/events/[id]] Error:', message); // Log the extracted message
+    console.error('[GET /api/events/[id]] Error:', message);
     return NextResponse.json(
-      { success: false, error: message }, // Return the extracted message
+      { success: false, error: message },
       { status: 500 }
     );
   }
@@ -78,9 +76,9 @@ export async function GET(
 // PUT - Update an event
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> } // Keep params as Promise type
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const resolvedParams = await params; // Resolve the promise
+  const resolvedParams = await params;
   const { id } = resolvedParams;
 
   if (!id) {
@@ -99,10 +97,8 @@ export async function PUT(
 
   try {
     const body = await request.json();
-    // It's good practice to explicitly list fields to update for security
     const { name, date, location, description } = body;
 
-    // Optional: Add validation for incoming body fields if needed
     if (!name || !date || !location) {
       return NextResponse.json(
         { success: false, error: 'Name, date, and location are required' },
@@ -112,12 +108,11 @@ export async function PUT(
 
     await connectDB();
 
-    // Use specific fields in the update operation
     const updatedEvent = await Event.findByIdAndUpdate(
       id,
-      { name, date, location, description }, // Update only allowed fields
+      { name, date, location, description },
       { new: true, runValidators: true }
-    ).lean(); // Use lean if you just need the data
+    ).lean();
 
     if (!updatedEvent) {
       return NextResponse.json(
@@ -125,23 +120,20 @@ export async function PUT(
         { status: 404 }
       );
     }
-
-    // Format the response if needed (similar to GET)
+    
     const formattedUpdate = {
         ...updatedEvent,
         _id: updatedEvent._id?.toString(),
         date: updatedEvent.date?.toISOString(),
-        // participants might not be populated here unless explicitly requested/handled
     };
 
     return NextResponse.json(
-      { success: true, data: formattedUpdate }, // Send formatted data
+      { success: true, data: formattedUpdate },
       { status: 200 }
     );
-  } catch (error: unknown) { // FIX: Changed any to unknown
+  } catch (error: unknown) {
     const message = (error instanceof Error) ? error.message : 'An unknown error occurred';
     console.error('[PUT /api/events/[id]] Error:', message);
-     // Handle Mongoose validation errors specifically
     if (error instanceof mongoose.Error.ValidationError) {
         return NextResponse.json({ success: false, error: error.message }, { status: 400 });
     }
@@ -154,10 +146,10 @@ export async function PUT(
 
 // DELETE - Delete an event
 export async function DELETE(
-  request: NextRequest, // request might be unused but keep for signature consistency
-  { params }: { params: Promise<{ id: string }> } // Keep params as Promise type
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const resolvedParams = await params; // Resolve the promise
+  const resolvedParams = await params;
   const { id } = resolvedParams;
 
   if (!id) {
@@ -186,14 +178,11 @@ export async function DELETE(
       );
     }
 
-    // Optional: Add logic here to clean up related data, e.g., Participants
-    // await Participant.deleteMany({ eventId: id });
-
     return NextResponse.json(
       { success: true, message: 'Event deleted successfully' },
-      { status: 200 } // Or 204 No Content if preferred for DELETE
+      { status: 200 }
     );
-  } catch (error: unknown) { // FIX: Changed any to unknown
+  } catch (error: unknown) {
     const message = (error instanceof Error) ? error.message : 'An unknown error occurred';
     console.error('[DELETE /api/events/[id]] Error:', message);
     return NextResponse.json(

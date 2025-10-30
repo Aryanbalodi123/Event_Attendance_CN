@@ -1,7 +1,7 @@
 // src/lib/types.ts
 import { Document, Types } from 'mongoose';
 
-// --- Your Event and Participant interfaces remain unchanged ---
+// --- Event Interface ---
 export interface IEvent extends Document {
   _id: Types.ObjectId;
   name: string;
@@ -13,16 +13,19 @@ export interface IEvent extends Document {
   updatedAt?: Date;
 }
 
+// --- Participant Interface (Updated) ---
 export interface IParticipant extends Document {
   _id: Types.ObjectId;
   name: string;
   email: string;
+  rollNumber: string; // <-- ADDED THIS FIELD
   eventId: Types.ObjectId | IEvent;
   attended: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
 
+// --- Other interfaces remain unchanged ---
 export interface IStudent extends Document {
   _id: Types.ObjectId;
   name: string;
@@ -32,8 +35,6 @@ export interface IStudent extends Document {
   group?: string;
   createdAt?: Date;
   updatedAt?: Date;
-  
-  // --- Password reset fields ---
   resetToken?: string;
   resetTokenExpiry?: Date;
   lastPasswordReset?: Date;
@@ -49,8 +50,6 @@ export interface IAdmin extends Document {
   adminRole?: string;
   createdAt?: Date;
   updatedAt?: Date;
-
-  // --- Password reset fields ---
   resetToken?: string;
   resetTokenExpiry?: Date;
   lastPasswordReset?: Date;

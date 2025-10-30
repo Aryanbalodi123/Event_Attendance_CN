@@ -1,45 +1,10 @@
 import React from 'react';
 import { IEvent } from '@/lib/types';
-import ParticipantList from '@/components/admin/ParticipantList';
+import ParticipantList from '@/components/admin/ParticipantList'; // Ensure this path is correct
 import EventQrDisplay from '@/components/admin/EventQrDisplay';
 import mongoose from 'mongoose';
 
-// Function to fetch events on the server (no changes)
-async function getEventDetails(id: string) {
-  // Add better validation
-  if (!id) {
-    throw new Error('Event ID is required');
-  }
-
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    throw new Error('Invalid Event ID format');
-  }
-
-  try {
-    const baseUrl =
-      process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/events/${id}`, {
-      cache: 'no-store',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.error || 'Failed to fetch event');
-    }
-
-    const data = await res.json();
-    return data.data;
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error('[getEventDetails] Error:', message);
-    throw error; // Re-throw to be handled by the caller
-  }
-}
-
-// Re-usable Error Component styled like the Student Page
+// Re-usable Error Component
 const StyledErrorDisplay = ({
   id,
   message,
@@ -51,21 +16,19 @@ const StyledErrorDisplay = ({
 }) => {
   return (
     <div className="dark min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-gray-300 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* Animated background (from StudentPage) */}
+      {/* ... (error component code remains the same) ... */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-500/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl"></div>
       </div>
-
       <div className="bg-slate-900/80 backdrop-blur-2xl p-10 rounded-3xl border border-red-500/20 shadow-2xl max-w-md w-full text-center space-y-6 z-10 relative">
         <div className="relative">
-          {/* Icon (from StudentPage) */}
           <div className="w-24 h-24 bg-gradient-to-br from-red-500/20 to-red-600/20 rounded-3xl flex items-center justify-center mx-auto backdrop-blur-xl border border-red-500/30 shadow-2xl">
             <svg
               className="w-12 h-12 text-red-500"
               fill="none"
               stroke="currentColor"
-              viewBox="0 0 24 24"
+              viewBox="0 0 24"
             >
               <path
                 strokeLinecap="round"
@@ -78,20 +41,17 @@ const StyledErrorDisplay = ({
           <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-red-600/20 rounded-3xl blur-2xl animate-pulse"></div>
         </div>
         <div className="space-y-3">
-          {/* Dynamic Title */}
           <h2 className="text-3xl font-bold bg-gradient-to-r from-red-400 to-red-600 bg-clip-text text-transparent">
             {title}
           </h2>
-          {/* Dynamic Message */}
           <p className="text-gray-400 leading-relaxed">{message}</p>
           {id && (
             <p className="text-gray-600 text-sm font-mono pt-2">ID: {id}</p>
           )}
         </div>
-        {/* Link styled as a Button (from CreateEventForm) */}
         <a
           href="/admin"
-          className="inline-block px-6 py-3 bg-orange-500 text-black border-2 border-orange-600 rounded-lg font-semibold hover:bg-orange-600 hover:border-orange-700 transition-all shadow-lg shadow-orange-500/30"
+          className="inline-block w-full h-12 px-6 py-3 text-base font-semibold bg-orange-500 text-black rounded-lg shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 hover:bg-orange-600 transition-all duration-300"
         >
           Back to Dashboard
         </a>
@@ -99,6 +59,38 @@ const StyledErrorDisplay = ({
     </div>
   );
 };
+// -------------------------------------
+
+// Function to fetch events on the server
+async function getEventDetails(id: string) {
+  if (!id) {
+    throw new Error('Event ID is required');
+  }
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    throw new Error('Invalid Event ID format');
+  }
+
+  try {
+    const baseUrl =
+      process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const res = await fetch(`${baseUrl}/api/events/${id}`, {
+      cache: 'no-store', // This ensures data is fresh
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Failed to fetch event');
+    }
+
+    const data = await res.json();
+    return data.data;
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('[getEventDetails] Error:', message);
+    throw error;
+  }
+}
 
 // This is the main page component
 export default async function EventDetailsPage({
@@ -127,7 +119,6 @@ export default async function EventDetailsPage({
     errorMessage = error instanceof Error ? error.message : String(error);
   }
 
-  // Handle all errors (fetch error or not found)
   if (!event || errorMessage) {
     return (
       <StyledErrorDisplay
@@ -143,8 +134,13 @@ export default async function EventDetailsPage({
 
   // Main success UI
   return (
-    <div className="dark min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-gray-300 p-4 md:p-6 relative overflow-hidden">
-      {/* Animated background (from StudentPage) */}
+    // --- ***THIS IS THE KEY*** ---
+    // min-h-screen (mobile) allows page to grow and scroll
+    // lg:h-screen (desktop) locks page height
+    // lg:overflow-hidden (desktop) hides the page scrollbar
+    <div className="dark min-h-screen lg:h-screen flex flex-col bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-gray-300 p-4 md:p-6 relative lg:overflow-hidden">
+      
+      {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-orange-500/5 rounded-full blur-3xl animate-pulse"></div>
         <div
@@ -158,72 +154,101 @@ export default async function EventDetailsPage({
       </div>
 
       {/* Main Content Container */}
-      <div className="container mx-auto z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-          {/* Column 1: Event Details & Participant List */}
-          <div className="lg:col-span-2 space-y-6 md:space-y-8">
-            {/* Event Details Card (Styled like StudentPage) */}
-            <div className="bg-slate-900/60 backdrop-blur-2xl p-6 md:p-8 rounded-3xl border border-slate-800/50 shadow-2xl space-y-4">
-              <h1 className="text-4xl font-bold text-orange-400 mb-2">
-                {event.name}
-              </h1>
-              <p className="text-gray-300 text-lg mb-1">
-                {new Date(event.date).toLocaleString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  hour12: true,
-                })}
-              </p>
-              <div className="flex items-center space-x-2 text-gray-400">
-                <svg
-                  className="w-5 h-5 flex-shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-                <span>{event.location}</span>
-              </div>
-            </div>
-
-            {/* Participant List (Wrapped in new styled card) */}
-            <div className="bg-slate-900/60 backdrop-blur-2xl rounded-3xl border border-slate-800/50 shadow-2xl overflow-hidden">
-              {/* Note: ParticipantList component might need internal padding removed if it has its own, 
-                  but p-6/p-8 is applied here to contain it. 
-                  If ParticipantList has its own card, just place it here without the wrapper. */}
-              <div className="p-6 md:p-8">
-                <ParticipantList event={event} />
+      <div className="container mx-auto relative flex-1 flex flex-col">
+        
+        {/* Layout container: flex-col (mobile) and grid (desktop) */}
+        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6 md:gap-8 flex-1 min-h-0">
+          
+          {/* --- Item 1: Header --- */}
+          <div className="lg:col-span-2 bg-slate-900/60 backdrop-blur-2xl p-5 rounded-3xl border border-slate-800/50 shadow-2xl flex-shrink-0">
+            <h1 className="text-2xl font-black bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent leading-tight">
+              {event.name}
+            </h1>
+            <p className="text-sm text-gray-400 font-medium mt-1">
+              Operations Dashboard
+            </p>
+            <div className="relative group pt-3">
+              <div className="relative space-y-1.5">
+                <p className="text-gray-300 text-sm">
+                  {new Date(event.date).toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </p>
+                <div className="flex items-center space-x-2 text-gray-400 text-sm">
+                  <svg
+                    className="w-4 h-4 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                  <span>{event.location}</span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Column 2: Event QR Code Display (Styled like StudentPage) */}
-          <div className="lg:col-span-1">
-            <div className="bg-slate-900/60 backdrop-blur-2xl p-6 md:p-8 rounded-3xl border border-slate-800/50 shadow-2xl">
-              <h2 className="text-2xl font-bold text-gray-200 mb-6 text-center">
-                Event Check-in
-              </h2>
-              <EventQrDisplay
-                eventId={String(event._id)}
-                eventName={event.name}
-              />
+          {/* --- Item 2: QR Code --- */}
+          {/* lg:row-span-2 makes it fill both grid rows on desktop */}
+          <div className="lg:col-span-1 lg:row-span-2">
+            <div className="bg-slate-900/60 backdrop-blur-2xl p-6 md:p-8 rounded-3xl border border-slate-800/50 shadow-2xl flex flex-col items-center">
+              <div className="text-center space-y-3 pb-6 border-b border-slate-800/50 w-full">
+                <div className="relative inline-block">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 rounded-3xl shadow-2xl shadow-orange-500/30 relative z-10">
+                    <svg
+                      className="w-8 h-8 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 001-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
+                      />
+                    </svg>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-orange-700 rounded-3xl blur-2xl opacity-40 animate-pulse"></div>
+                </div>
+                <h2 className="text-2xl font-black text-gray-200 pt-3">
+                  Live Check-in Kiosk
+                </h2>
+              </div>
+              <div className="pt-6 flex flex-col items-center gap-6">
+                <EventQrDisplay eventId={String(event._id)} />
+                <p className="text-gray-400 text-center max-w-xs text-sm">
+                  Students scan this code with their device to mark their
+                  attendance.
+                </p>
+              </div>
             </div>
           </div>
+
+          {/* --- Item 3: List --- */}
+          {/* --- ***THIS WRAPPER IS ALSO KEY*** --- */}
+          {/* This container setup (flex-1, min-h-0, etc.) is correct and crucial. */}
+          {/* It works with the parent lg:h-screen to enable internal scroll. */}
+          <div className="lg:col-span-2 bg-slate-900/60 rounded-3xl border border-slate-800/50 shadow-2xl flex-1 min-h-0 flex flex-col p-6 md:p-8">
+            <ParticipantList event={event} />
+          </div>
+
         </div>
       </div>
     </div>

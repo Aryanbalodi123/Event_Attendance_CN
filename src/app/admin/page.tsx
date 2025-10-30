@@ -26,7 +26,7 @@ export default async function AdminDashboardPage() {
   const initialEvents: IEvent[] = await getEvents();
 
   return (
-    <div>
+    <div className="w-full max-w-7xl mx-auto p-4 md:p-8 dark min-h-screen bg-black text-gray-300">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 mb-2">
               Events Dashboard
@@ -38,5 +38,3 @@ export default async function AdminDashboardPage() {
   );
 }
 
-// Add this to your .env.local if deploying
-// NEXT_PUBLIC_APP_URL=https://your-deployment-url.com
