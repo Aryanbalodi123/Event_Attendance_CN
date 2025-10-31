@@ -4,8 +4,13 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { IEvent } from '@/lib/types';
 import Button from '../ui/Button';
 import Modal from '../ui/Modal';
-const ModalAny = Modal as unknown as React.ComponentType<any>;
-import CreateEventForm from '../forms/CreateEventForm';
+
+const TypedModal = Modal as unknown as React.ComponentType<{
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+}>;import CreateEventForm from '../forms/CreateEventForm';
 import { Plus, Trash2, Calendar, MapPin, ArrowRight, Filter } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -327,16 +332,16 @@ const EventList: React.FC<EventListProps> = ({ initialEvents }) => {
             })}
           </div>
         )}
-        <ModalAny
-          isOpen={isModalOpen}
+     <TypedModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Create New Event"
+      >
+        <CreateEventForm
+          onSuccess={handleEventCreated}
           onClose={() => setIsModalOpen(false)}
-          title="Create New Event"
-        >
-          <CreateEventForm
-            onSuccess={handleEventCreated}
-            onClose={() => setIsModalOpen(false)}
-          />
-        </ModalAny>
+        />
+      </TypedModal>
       </div>
     </div>
   );

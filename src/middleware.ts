@@ -9,7 +9,6 @@ const protectedRoutes = {
 };
 
 const authRoutes = ['/login', '/signup'];
-const publicRoutes = ['/']; // Define public routes if needed, now just root
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

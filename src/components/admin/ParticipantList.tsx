@@ -183,7 +183,6 @@ const ParticipantList: React.FC<{ event: IEvent }> = ({ event }) => {
 
   const eventIdString = event._id ? String(event._id) : undefined
 
-  const maxListHeight = 'calc(100vh - 320px)'
 
   return (
   <div className="flex flex-col h-full min-h-0">

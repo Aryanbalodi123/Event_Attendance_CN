@@ -143,7 +143,7 @@ export default function LoginPage() {
     setError(null);
     setFormErrors({ email: '', rollNumber: '' });
 
-    let currentFormErrors = { email: '', rollNumber: '' };
+    const  currentFormErrors = { email: '', rollNumber: '' };
     let isValid = true;
 
     // 1. Email validation (always)

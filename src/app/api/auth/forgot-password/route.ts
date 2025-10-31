@@ -97,7 +97,6 @@ export async function POST(request: Request) {
 
   } catch (error: unknown) {
     console.error('[FORGOT_PASSWORD_API_ERROR]', error);
-    const message = error instanceof Error ? error.message : 'An unknown server error occurred.';
     return NextResponse.json({ success: false, error: "An error occurred. Please try again later." }, { status: 500 });
   }
 }

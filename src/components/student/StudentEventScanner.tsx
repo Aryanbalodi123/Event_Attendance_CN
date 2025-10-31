@@ -16,7 +16,7 @@ interface StudentEventScannerProps {
   eventId: string;
 }
 
-const StudentEventScanner: React.FC<StudentEventScannerProps> = ({ participantId, participantName, email, rollNumber, eventId }) => {
+const StudentEventScanner: React.FC<StudentEventScannerProps> = ({ participantId, participantName, email, rollNumber }) => {
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState<'success' | 'error' | 'loading' | null>(null);
   const [scannedData, setScannedData] = useState<string | null>(null);

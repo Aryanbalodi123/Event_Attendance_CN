@@ -2,7 +2,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Spinner from '@/components/ui/Spinner';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
