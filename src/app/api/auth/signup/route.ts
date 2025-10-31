@@ -9,9 +9,9 @@ export async function POST(request: Request) {
   await connectDB();
   try {
     const body = await request.json();
-    const { role, name, email, password } = body;
+    const { role, name, email, password, rollNumber } = body;
 
-    if (!role || !name || !email || !password) {
+    if (!role || !name || !email || !password || (role === 'student' && !rollNumber)) {
       return NextResponse.json(
         { success: false, error: 'Missing required fields' },
         { status: 400 }
@@ -25,11 +25,14 @@ export async function POST(request: Request) {
     if (role === 'student') {
       const { year, group } = body;
 
-      // Check if student already exists
-      const existingStudent = await Student.findOne({ email: email.toLowerCase() });
+      // Check if student already exists (by email or rollNumber)
+      const existingStudent = await Student.findOne({ $or: [
+        { email: email.toLowerCase() },
+        { rollNumber: rollNumber.trim().toLowerCase() }
+      ] });
       if (existingStudent) {
         return NextResponse.json(
-          { success: false, error: 'Student with this email already exists' },
+          { success: false, error: 'Student with this email or roll number already exists' },
           { status: 400 }
         );
       }
@@ -41,13 +44,14 @@ export async function POST(request: Request) {
         password: hashedPassword,
         year,
         group,
+        rollNumber: rollNumber.trim().toLowerCase(),
       });
 
       // --- FIX: Convert ObjectId to string ---
-      await createSession(newStudent._id.toString(), 'student', newStudent.name, newStudent.email);
+      await createSession(newStudent._id.toString(), 'student', newStudent.name, newStudent.email, newStudent.rollNumber);
       
       return NextResponse.json(
-        { success: true, data: { id: newStudent._id, name: newStudent.name, email: newStudent.email, role: 'student' } },
+        { success: true, data: { id: newStudent._id, name: newStudent.name, email: newStudent.email, role: 'student', rollNumber: newStudent.rollNumber } },
         { status: 201 }
       );
 

@@ -58,8 +58,8 @@ const EventCard: React.FC<{ event: IEvent; onDelete: (eventId: string) => void }
   }
 
   return (
-    <Link href={`/admin/events/${eventId}`}>
-  <div className="group relative bg-linear-to-br from-gray-900/90 to-gray-800/90 backdrop-blur-xl border border-gray-700/50 rounded-3xl p-6 shadow-xl hover:shadow-2xl hover:shadow-orange-500/20 hover:border-orange-500/50 transition-all duration-300 cursor-pointer overflow-hidden">
+    <Link href={`/admin/events/${eventId}`} className="block h-full">
+      <div className="group relative h-full bg-linear-to-br from-gray-900/90 to-gray-800/90 backdrop-blur-xl border border-gray-700/50 rounded-3xl p-6 shadow-xl hover:shadow-2xl hover:shadow-orange-500/20 hover:border-orange-500/50 transition-all duration-300 cursor-pointer overflow-hidden">
         {/* Animated gradient overlay */}
   <div className="absolute inset-0 bg-linear-to-br from-orange-500/0 via-orange-500/0 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl" />
         
@@ -224,21 +224,11 @@ const EventList: React.FC<EventListProps> = ({ initialEvents }) => {
   };
 
   return (
-  <div className="font-['Poppins',sans-serif] min-h-screen w-full bg-black bg-linear-to-br from-black via-gray-900 to-black px-2 sm:px-4 md:px-8 py-4 md:py-8 flex flex-col items-center justify-start">
-      <div className="w-full max-w-7xl">
+    <div className="font-['Poppins',sans-serif] w-full">
+      <div className="w-full">
         {/* Header section with Create Event button */}
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex-1">
-            {/* Search bar */}
-            <input
-              type="text"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search events by name..."
-              className="w-full sm:w-80 px-4 py-2 rounded-xl border border-gray-700 bg-gray-900 text-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-200 mb-2 sm:mb-0"
-              aria-label="Search events"
-            />
-          </div>
+        <div className="mb-6 flex flex-row items-center justify-between gap-4">
+          <div className="flex-1" />
           <Button 
             onClick={() => setIsModalOpen(true)}
             className="group relative px-6 py-3 bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-orange-500/50 transition-all duration-300 hover:scale-105"
@@ -258,32 +248,46 @@ const EventList: React.FC<EventListProps> = ({ initialEvents }) => {
             </div>
             <h2 className="text-lg font-semibold text-gray-200">Filter Events</h2>
           </div>
-          {/* Filter Buttons */}
-          <div className="flex flex-wrap gap-3">
-            <FilterButton
-              label="All Events"
-              isActive={activeFilter === 'all'}
-              onClick={() => setActiveFilter('all')}
-              count={counts.all}
-            />
-            <FilterButton
-              label="Upcoming"
-              isActive={activeFilter === 'upcoming'}
-              onClick={() => setActiveFilter('upcoming')}
-              count={counts.upcoming}
-            />
-            <FilterButton
-              label="Today"
-              isActive={activeFilter === 'today'}
-              onClick={() => setActiveFilter('today')}
-              count={counts.today}
-            />
-            <FilterButton
-              label="Past"
-              isActive={activeFilter === 'past'}
-              onClick={() => setActiveFilter('past')}
-              count={counts.past}
-            />
+          {/* Filter Buttons and Search in one line */}
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-wrap gap-3 flex-1">
+              <FilterButton
+                label="All Events"
+                isActive={activeFilter === 'all'}
+                onClick={() => setActiveFilter('all')}
+                count={counts.all}
+              />
+              <FilterButton
+                label="Upcoming"
+                isActive={activeFilter === 'upcoming'}
+                onClick={() => setActiveFilter('upcoming')}
+                count={counts.upcoming}
+              />
+              <FilterButton
+                label="Today"
+                isActive={activeFilter === 'today'}
+                onClick={() => setActiveFilter('today')}
+                count={counts.today}
+              />
+              <FilterButton
+                label="Past"
+                isActive={activeFilter === 'past'}
+                onClick={() => setActiveFilter('past')}
+                count={counts.past}
+              />
+            </div>
+            
+            {/* Search bar */}
+            <div className="shrink-0">
+              <input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search events..."
+                className="w-full sm:w-64 px-4 py-2.5 rounded-xl border border-gray-700 bg-gray-900/50 text-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all duration-200"
+                aria-label="Search events"
+              />
+            </div>
           </div>
         </div>
 
@@ -313,7 +317,7 @@ const EventList: React.FC<EventListProps> = ({ initialEvents }) => {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 auto-rows-fr">
             {filteredEvents.map((event, idx) => {
               const key = event._id ? String(event._id) : `missing-id-${event.name ?? idx}`;
               if (!event._id) {
@@ -323,17 +327,17 @@ const EventList: React.FC<EventListProps> = ({ initialEvents }) => {
             })}
           </div>
         )}
-      </div>
-      <ModalAny
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        title="Create New Event"
-      >
-        <CreateEventForm
-          onSuccess={handleEventCreated}
+        <ModalAny
+          isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-        />
-      </ModalAny>
+          title="Create New Event"
+        >
+          <CreateEventForm
+            onSuccess={handleEventCreated}
+            onClose={() => setIsModalOpen(false)}
+          />
+        </ModalAny>
+      </div>
     </div>
   );
 };

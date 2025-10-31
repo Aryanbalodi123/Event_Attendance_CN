@@ -31,6 +31,7 @@ export interface IStudent extends Document {
   name: string;
   email: string;
   password?: string;
+  rollNumber: string;
   year?: number;
   group?: string;
   createdAt?: Date;

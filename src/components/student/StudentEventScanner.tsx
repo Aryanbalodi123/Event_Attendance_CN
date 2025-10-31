@@ -11,9 +11,12 @@ import Toast from '@/components/ui/Toast';
 interface StudentEventScannerProps {
   participantId: string;
   participantName: string;
+  email: string;
+  rollNumber: string;
+  eventId: string;
 }
 
-const StudentEventScanner: React.FC<StudentEventScannerProps> = ({ participantId, participantName }) => {
+const StudentEventScanner: React.FC<StudentEventScannerProps> = ({ participantId, participantName, email, rollNumber, eventId }) => {
   const [message, setMessage] = useState('');
   const [status, setStatus] = useState<'success' | 'error' | 'loading' | null>(null);
   const [scannedData, setScannedData] = useState<string | null>(null);
@@ -51,7 +54,13 @@ const StudentEventScanner: React.FC<StudentEventScannerProps> = ({ participantId
       const res = await fetch('/api/attendance/mark', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ participantId, eventId }),
+        body: JSON.stringify({ 
+          participantId,
+          eventId,
+          name: participantName,
+          email,
+          rollNumber
+        }),
       });
 
       const data = await res.json();
@@ -85,7 +94,7 @@ const StudentEventScanner: React.FC<StudentEventScannerProps> = ({ participantId
       }, 4000);
     }
    // FIX: Add dependencies for useCallback
-  }, [participantId, scannedData]);
+  }, [participantId, scannedData, participantName, email, rollNumber]);
 
   // FIX: Removed unused 'errorMessage'
   const handleScanError = (/* errorMessage: string */) => { /* Ignore non-fatal errors */ };
@@ -97,6 +106,7 @@ const StudentEventScanner: React.FC<StudentEventScannerProps> = ({ participantId
         console.error(`Scanner container element with ID ${containerIdRef.current} not found.`);
         return;
     }
+    
 
     // Only create scanner if it doesn't exist and status is not 'success'
     // This prevents re-rendering scanner after successful scan

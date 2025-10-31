@@ -27,6 +27,7 @@ interface DecryptedPayload extends JWTPayload {
   role: string;
   name: string;
   email: string;
+  rollNumber?: string;
   expires?: Date | number; // jose uses number for expiration time ('exp')
 }
 
@@ -43,10 +44,13 @@ export async function decrypt(input: string): Promise<DecryptedPayload | null> {
   }
 }
 
-export async function createSession(userId: string, role: string, name: string, email: string) {
+
+// Properly export createSession, supporting rollNumber for students
+export async function createSession(userId: string, role: string, name: string, email: string, rollNumber?: string) {
   const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 1 day
-  // Ensure the payload matches DecryptedPayload (or JWTPayload if using default claims)
-  const sessionPayload: DecryptedPayload = { userId, role, name, email, expires: expires.getTime() / 1000 }; // Use numeric timestamp for 'exp'
+  const sessionPayload: DecryptedPayload = rollNumber
+    ? { userId, role, name, email, rollNumber, expires: expires.getTime() / 1000 }
+    : { userId, role, name, email, expires: expires.getTime() / 1000 };
   const session = await encrypt(sessionPayload);
 
   const cookieStore = await cookies();

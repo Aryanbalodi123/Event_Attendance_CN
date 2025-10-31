@@ -3,13 +3,11 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from 'next/navigation';
 import Spinner from '@/components/ui/Spinner';
-import Link from 'next/link'; // <-- IMPORT LINK
+import Link from 'next/link';
 
 type Role = 'student' | 'admin';
 
-// Defined SignupBody type
 type SignupBody = {
-  // ... (rest of type)
   role: Role;
   name: string;
   email: string;
@@ -27,7 +25,6 @@ export default function LoginPage() {
 
   const [role, setRole] = useState<Role>('student');
 
-  // ... (rest of your state)
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -40,7 +37,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // ... (rest of your useEffects and handlers)
   useEffect(() => {
      const link = document.createElement("link");
     link.href =
@@ -96,11 +92,26 @@ export default function LoginPage() {
       password,
     };
 
+    // ---
+    // --- THIS IS THE FIX ---
+    // ---
     if (role === 'student') {
-      body = { ...body, year: year || undefined, group: group || undefined };
+      // Student payload now includes rollNumber
+      body = {
+        ...body,
+        year: year || undefined,
+        group: group || undefined,
+        rollNumber: rollNumber || undefined // <-- ADDED ROLL NUMBER HERE
+      };
     } else {
-      body = { ...body, rollNumber: rollNumber || undefined, team: team || undefined, adminRole: adminRole || undefined };
+      // Admin payload no longer includes rollNumber
+      body = {
+        ...body,
+        team: team || undefined,
+        adminRole: adminRole || undefined
+      };
     }
+    // --- END OF FIX ---
 
     try {
       const res = await fetch('/api/auth/signup', {
@@ -114,17 +125,14 @@ export default function LoginPage() {
         throw new Error(data.error || 'Sign up failed');
       }
 
-      if (role === 'admin') {
-        router.push('/admin');
-      } else {
-        router.push('/student');
-      }
+      // After successful signup, automatically log in
+      await handleLogin();
 
     } catch (err: unknown) {
        setError(err instanceof Error ? err.message : 'An unexpected signup error occurred');
-    } finally {
-      setIsLoading(false);
+       setIsLoading(false); // Stop loading only on signup error
     }
+    // handleLogin() has its own finally, so we don't need one here
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -206,7 +214,6 @@ export default function LoginPage() {
             </h2>
 
             <div className="space-y-4">
-              {/* ... (rest of form inputs) ... */}
               {!isLoginView && (
                  <div>
                    <label htmlFor="name" className="sr-only">Full Name</label>
@@ -222,7 +229,7 @@ export default function LoginPage() {
                    />
                  </div>
                )}
-                 <div>
+                <div>
                  <label htmlFor="identifier" className="sr-only">Email</label>
                  <input
                    id="identifier"
@@ -248,7 +255,11 @@ export default function LoginPage() {
                    required
                  />
                </div>
-                {role === 'student' && !isLoginView && (
+               
+               {/* ---
+               --- THIS IS THE FIX ---
+               --- */}
+               {role === 'student' && !isLoginView && (
                  <>
                    <div>
                      <label htmlFor="year" className="sr-only">Year</label>
@@ -274,10 +285,7 @@ export default function LoginPage() {
                        className="w-full bg-zinc-900 bg-opacity-50 text-white placeholder-gray-500 px-4 py-3 rounded-lg border border-orange-900 border-opacity-30 focus:border-orange-500 focus:outline-none transition"
                      />
                    </div>
-                 </>
-               )}
-                {role === 'admin' && !isLoginView && (
-                 <>
+                   {/* MOVED ROLL NUMBER HERE */}
                    <div>
                      <label htmlFor="rollNumber" className="sr-only">Roll Number</label>
                      <input
@@ -288,8 +296,14 @@ export default function LoginPage() {
                        value={rollNumber}
                        onChange={(e) => setRollNumber(e.target.value)}
                        className="w-full bg-zinc-900 bg-opacity-50 text-white placeholder-gray-500 px-4 py-3 rounded-lg border border-orange-900 border-opacity-30 focus:border-orange-500 focus:outline-none transition"
+                       required // Make it required for students
                      />
                    </div>
+                 </>
+               )}
+               {role === 'admin' && !isLoginView && (
+                 <>
+                   {/* REMOVED ROLL NUMBER FROM HERE */}
                    <div>
                      <label htmlFor="team" className="sr-only">Team</label>
                      <input
@@ -316,10 +330,12 @@ export default function LoginPage() {
                    </div>
                  </>
                )}
+               {/* --- END OF FIX --- */}
+
 
               {error && (
-                <p className="text-red-400 text-sm text-center">{error}</p>
-              )}
+                 <p className="text-red-400 text-sm text-center">{error}</p>
+               )}
 
               <button
                 type="submit"
@@ -332,13 +348,11 @@ export default function LoginPage() {
 
             {/* Footer Links */}
             <div className="mt-6 space-y-3 text-center">
-              {/* --- FIX: UPDATED THIS LINK --- */}
               <Link href="/forgot-password" legacyBehavior>
                 <a className="text-orange-400 hover:text-orange-300 text-sm block transition">
                   Forgot password?
                 </a>
               </Link>
-              {/* ------------------------- */}
               <p className="text-gray-400 text-sm">
                 {isLoginView ? "Need a new account?" : "Already have an account?"}{" "}
                 <button

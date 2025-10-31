@@ -78,13 +78,14 @@ export default function StudentPage() {
       if (findRes.ok && findResult.success) {
         setParticipant(findResult.data);
       } else {
-        // 2. Not found? Create one using session data
+        // 2. Not found? Create one using session data (now includes rollNumber)
         const createRes = await fetch('/api/participants', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             name: session.name,
             email: session.email,
+            rollNumber: session.rollNumber,
             eventId: selectedEventId
           }),
         });
@@ -117,19 +118,19 @@ export default function StudentPage() {
 
   if (isSessionLoading) {
     return (
-      <div className="dark min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-gray-300 flex items-center justify-center p-4 relative overflow-hidden">
+  <div className="dark min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 text-gray-300 flex items-center justify-center p-4 relative overflow-hidden">
         {/* Animated background */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-orange-500/5 to-transparent rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-blue-500/5 to-transparent rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-linear-to-br from-orange-500/5 to-transparent rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-linear-to-tl from-blue-500/5 to-transparent rounded-full blur-3xl animate-pulse delay-1000"></div>
         </div>
         
         <div className="text-center space-y-6 z-10">
           <div className="relative">
-            <div className="w-20 h-20 mx-auto bg-gradient-to-br from-orange-500/20 to-orange-600/20 rounded-2xl flex items-center justify-center backdrop-blur-xl border border-orange-500/20 shadow-2xl shadow-orange-500/10">
+            <div className="w-20 h-20 mx-auto bg-linear-to-br from-orange-500/20 to-orange-600/20 rounded-2xl flex items-center justify-center backdrop-blur-xl border border-orange-500/20 shadow-2xl shadow-orange-500/10">
               <Spinner size={40} />
             </div>
-            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/20 to-orange-600/20 rounded-2xl blur-xl animate-pulse"></div>
+            <div className="absolute inset-0 bg-linear-to-br from-orange-500/20 to-orange-600/20 rounded-2xl blur-xl animate-pulse"></div>
           </div>
           <div className="space-y-2">
             <p className="text-xl font-semibold text-gray-200 animate-pulse">Loading your session</p>
@@ -142,7 +143,7 @@ export default function StudentPage() {
 
   if (!session) {
     return (
-      <div className="dark min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-gray-300 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+  <div className="dark min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 text-gray-300 flex flex-col items-center justify-center p-4 relative overflow-hidden">
         {/* Animated background */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-500/10 rounded-full blur-3xl"></div>
@@ -151,15 +152,15 @@ export default function StudentPage() {
 
         <div className="bg-slate-900/80 backdrop-blur-2xl p-10 rounded-3xl border border-red-500/20 shadow-2xl max-w-md w-full text-center space-y-6 z-10 relative">
           <div className="relative">
-            <div className="w-24 h-24 bg-gradient-to-br from-red-500/20 to-red-600/20 rounded-3xl flex items-center justify-center mx-auto backdrop-blur-xl border border-red-500/30 shadow-2xl">
+            <div className="w-24 h-24 bg-linear-to-br from-red-500/20 to-red-600/20 rounded-3xl flex items-center justify-center mx-auto backdrop-blur-xl border border-red-500/30 shadow-2xl">
               <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
-            <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-red-600/20 rounded-3xl blur-2xl animate-pulse"></div>
+            <div className="absolute inset-0 bg-linear-to-br from-red-500/20 to-red-600/20 rounded-3xl blur-2xl animate-pulse"></div>
           </div>
           <div className="space-y-3">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-red-400 to-red-600 bg-clip-text text-transparent">Session Expired</h2>
+            <h2 className="text-3xl font-bold bg-linear-to-r from-red-400 to-red-600 bg-clip-text text-transparent">Session Expired</h2>
             <p className="text-gray-400 leading-relaxed">Your session has expired. Please log in again to continue your journey.</p>
           </div>
           <Button onClick={() => window.location.href = '/login'} className="w-full h-12 text-base font-semibold shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40 transition-all duration-300">
@@ -171,7 +172,7 @@ export default function StudentPage() {
   }
 
   return (
-    <div className="dark min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-gray-300 flex items-center justify-center p-4 md:p-6 relative overflow-hidden">
+  <div className="dark min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 text-gray-300 flex items-center justify-center p-4 md:p-6 relative overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-orange-500/5 rounded-full blur-3xl animate-pulse"></div>
@@ -184,7 +185,7 @@ export default function StudentPage() {
         <div className="flex items-center justify-between mb-8 bg-slate-900/60 backdrop-blur-xl p-5 rounded-2xl border border-slate-800/50 shadow-xl hover:shadow-2xl transition-all duration-300">
           <div className="flex items-center space-x-4">
             <div className="relative">
-              <div className="w-14 h-14 bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-orange-500/30">
+              <div className="w-14 h-14 bg-linear-to-br from-orange-500 via-orange-600 to-orange-700 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-orange-500/30">
                 {session?.name?.charAt(0).toUpperCase()}
               </div>
               <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-slate-900 shadow-lg"></div>
@@ -211,15 +212,15 @@ export default function StudentPage() {
             {/* Enhanced Hero Section */}
             <div className="text-center space-y-4">
               <div className="relative inline-block">
-                <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 rounded-3xl shadow-2xl shadow-orange-500/30 relative z-10 group-hover:scale-105 transition-transform duration-300">
+                <div className="inline-flex items-center justify-center w-24 h-24 bg-linear-to-br from-orange-500 via-orange-600 to-orange-700 rounded-3xl shadow-2xl shadow-orange-500/30 relative z-10 group-hover:scale-105 transition-transform duration-300">
                   <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                   </svg>
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-orange-700 rounded-3xl blur-2xl opacity-40 animate-pulse"></div>
+                <div className="absolute inset-0 bg-linear-to-br from-orange-500 to-orange-700 rounded-3xl blur-2xl opacity-40 animate-pulse"></div>
               </div>
               <div className="space-y-2">
-                <h1 className="text-5xl font-black bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent leading-tight">
+                <h1 className="text-5xl font-black bg-linear-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent leading-tight">
                   Welcome Back!
                 </h1>
                 <p className="text-gray-400 text-lg font-medium max-w-md mx-auto leading-relaxed">
@@ -259,8 +260,8 @@ export default function StudentPage() {
               {/* Enhanced Event Preview Card */}
               {selectedEventId && (
                 <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-orange-500/20 to-orange-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
-                  <div className="relative bg-gradient-to-br from-orange-500/10 via-orange-600/5 to-transparent border border-orange-500/30 rounded-2xl p-6 space-y-3 transform group-hover:scale-[1.02] transition-all duration-300 backdrop-blur-sm">
+                  <div className="absolute inset-0 bg-linear-to-br from-orange-500/20 to-orange-600/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300"></div>
+                  <div className="relative bg-linear-to-br from-orange-500/10 via-orange-600/5 to-transparent border border-orange-500/30 rounded-2xl p-6 space-y-3 transform group-hover:scale-[1.02] transition-all duration-300 backdrop-blur-sm">
                     <div className="flex items-center justify-between">
                       <p className="text-xs font-bold text-orange-400 uppercase tracking-widest">Selected Event</p>
                       <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-lg shadow-green-500/50"></div>
@@ -291,7 +292,7 @@ export default function StudentPage() {
               <div className="relative group">
                 <div className="absolute inset-0 bg-red-500/20 rounded-2xl blur-xl"></div>
                 <div className="relative bg-red-500/10 border border-red-500/30 rounded-2xl p-5 flex items-start space-x-4 backdrop-blur-sm">
-                  <div className="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center shrink-0">
                     <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -310,7 +311,7 @@ export default function StudentPage() {
               className="w-full h-16 text-lg font-bold shadow-2xl shadow-orange-500/30 hover:shadow-orange-500/50 transition-all duration-300 rounded-2xl relative overflow-hidden group" 
               disabled={isLoading || !selectedEventId}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-linear-to-r from-orange-600 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               {isLoading ? (
                 <div className="flex items-center justify-center space-x-3 relative z-10">
                   <Spinner size={24} />
@@ -334,12 +335,12 @@ export default function StudentPage() {
             {/* Enhanced Scanner Header */}
             <div className="text-center space-y-5 pb-8 border-b border-slate-800/50">
               <div className="relative inline-block">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-500 via-green-600 to-emerald-600 rounded-3xl shadow-2xl shadow-green-500/30 relative z-10">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-linear-to-br from-green-500 via-green-600 to-emerald-600 rounded-3xl shadow-2xl shadow-green-500/30 relative z-10">
                   <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl blur-2xl opacity-50 animate-pulse"></div>
+                <div className="absolute inset-0 bg-linear-to-br from-green-500 to-emerald-600 rounded-3xl blur-2xl opacity-50 animate-pulse"></div>
                 {/* Pulse rings */}
                 <div className="absolute inset-0 bg-green-500/30 rounded-full animate-ping"></div>
               </div>
@@ -366,6 +367,9 @@ export default function StudentPage() {
               <StudentEventScanner
                 participantId={participant._id ? String(participant._id) : ''}
                 participantName={participant.name}
+                email={participant.email}
+                rollNumber={participant.rollNumber}
+                eventId={String(participant.eventId)}
               />
             </div>
 

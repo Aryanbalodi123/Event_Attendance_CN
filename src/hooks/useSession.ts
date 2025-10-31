@@ -8,6 +8,7 @@ interface SessionUser {
   name: string;
   email: string;
   role: 'student' | 'admin';
+  rollNumber?: string | null;
 }
 
 export function useSession() {

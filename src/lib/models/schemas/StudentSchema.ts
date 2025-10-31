@@ -21,6 +21,13 @@ const StudentSchema = new mongoose.Schema<IStudent>(
       minlength: [6, 'Password must be at least 6 characters.'],
       select: false, // Hide password by default on queries
     },
+    // --- ADDED ROLL NUMBER FIELD ---
+    rollNumber: {
+      type: String,
+      required: [true, 'Roll number is required.'],
+      trim: true,
+      unique: true,
+    },
     year: {
       type: Number,
     },

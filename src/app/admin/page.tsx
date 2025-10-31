@@ -25,24 +25,19 @@ export default async function AdminDashboardPage() {
   const initialEvents: IEvent[] = await getEvents();
 
   return (
-    // --- FIX START ---
-    // OUTER WRAPPER: This div provides the full-screen dark background.
-    <div className="dark min-h-screen bg-black text-gray-300">
-      
-      {/* INNER CONTAINER: This div centers your content and applies padding. */}
-      <div className="w-full max-w-7xl mx-auto p-4 md:p-8">
-        
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 mb-2">
-            Events Dashboard
-          </h1>
-          <SignOutButton />
+    <div className="min-h-screen w-full bg-black">
+      <div className="w-full">
+        <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600">
+              Events Dashboard
+            </h1>
+            <SignOutButton />
+          </div>
+          
+          <EventList initialEvents={initialEvents} />
         </div>
-        
-        <EventList initialEvents={initialEvents} />
-
       </div>
     </div>
-    // --- FIX END ---
   );
 }
