@@ -1,19 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-// Assuming IParticipant is defined in a types file
-// You might need to adjust this import path
-// import { IParticipant } from '@lib/types';
-
-// Mock type for demonstration if @lib/types is not available
-export interface IParticipant {
-  id: string;
-  name: string;
-  email: string;
-  rollNumber: string;
-  eventId: string;
-  registeredAt: Date;
-}
+import { IParticipant } from '@/lib/types';
+// ⛔️ DO NOT import 'mongoose' in a client component. It's a server library.
+// import { Types } from 'mongoose'; 
 
 
 interface AddParticipantFormProps {
@@ -38,8 +28,6 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
     setIsLoading(true);
     setError(null);
 
-    // --- UPDATED VALIDATION ---
-
     // 1. Check for empty fields
     if (!name || !email || !rollNumber) {
       setError('Name, Email, and Roll Number are required.');
@@ -63,38 +51,32 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
       return;
     }
     
-    // --- END OF VALIDATION ---
-
     try {
-      // Mock API call for demonstration
-      // Replace this with your actual fetch call
-      console.log('Submitting:', { name, email, rollNumber, eventId });
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
+      const res = await fetch('/api/participants', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          name, 
+          email, 
+          rollNumber, 
+          eventId: eventId // ✅ FIX 2: Just send the eventId string.
+        }),
+      });
 
-      // const res = await fetch('/api/participants', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ name, email, rollNumber, eventId }),
-      // });
+      const result = await res.json();
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to add participant');
+      }
 
-      // const result = await res.json();
-
-      // if (!result.success) {
-      //   throw new Error(result.error || 'Failed to add participant');
-      // }
-
-      // Mock success data
-      const mockNewParticipant: IParticipant = {
-        id: crypto.randomUUID(),
-        name,
-        email,
-        rollNumber,
-        eventId,
-        registeredAt: new Date(),
-      };
-
-      onSuccess(mockNewParticipant); // Use result.data in real app
-      onClose();
+      // ✅ FIX 1: Your API returns 'result.data', not 'result.participant'
+      if (result.data) {
+        onSuccess(result.data); 
+        onClose();
+      } else {
+        // This case should ideally not happen if success is true,
+        // but it's good practice to be defensive.
+        throw new Error('API returned success but no participant data.');
+      }
 
     } catch (err) {
       setError((err as Error).message);
@@ -104,7 +86,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
   };
 
   return (
-    <div className="bg-black rounded-2xl shadow-2xl p-6 sm:p-8 border-2 border-orange-500 w-full max-w-md mx-auto">
+  <div className="glass-modal glass-modal-centered shadow-2xl p-6 sm:p-8 border-2 border-orange-500 w-full max-w-md mx-auto frosted-glass">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="border-b-2 border-orange-500 pb-4">
           <h2 className="text-2xl font-bold text-orange-500 tracking-tight text-center">
@@ -129,6 +111,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
+              disabled={isLoading}
               className="w-full bg-gray-900 text-white border-2 border-orange-500 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-500/50 transition-all"
               placeholder="Enter full name"
             />
@@ -144,6 +127,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
               value={rollNumber}
               onChange={(e) => setRollNumber(e.target.value)}
               required
+              disabled={isLoading}
               maxLength={10} // Good UX to prevent typing more than 10
               className="w-full bg-gray-900 text-white border-2 border-orange-500 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-500/50 transition-all"
               placeholder="Enter 10-digit roll number"
@@ -160,7 +144,8 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full bg-gray-900 text-white border-2 border-orange-500 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-500/50 transition-all"
+              disabled={isLoading}
+              className="w-full bg-gray-90Videos0 text-white border-2 border-orange-500 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-500/50 transition-all"
               placeholder="username@chitkara.edu.in"
             />
           </div>

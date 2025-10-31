@@ -1,4 +1,3 @@
-// src/app/admin/page.tsx
 import React from 'react';
 import EventList from '@components/admin/EventList';
 import SignOutButton from '@/components/ui/SignOutButton';
@@ -26,15 +25,24 @@ export default async function AdminDashboardPage() {
   const initialEvents: IEvent[] = await getEvents();
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-4 md:p-8 dark min-h-screen bg-black text-gray-300">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 mb-2">
-              Events Dashboard
-            </h1>
-        <SignOutButton />
+    // --- FIX START ---
+    // OUTER WRAPPER: This div provides the full-screen dark background.
+    <div className="dark min-h-screen bg-black text-gray-300">
+      
+      {/* INNER CONTAINER: This div centers your content and applies padding. */}
+      <div className="w-full max-w-7xl mx-auto p-4 md:p-8">
+        
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 mb-2">
+            Events Dashboard
+          </h1>
+          <SignOutButton />
+        </div>
+        
+        <EventList initialEvents={initialEvents} />
+
       </div>
-      <EventList initialEvents={initialEvents} />
     </div>
+    // --- FIX END ---
   );
 }
-

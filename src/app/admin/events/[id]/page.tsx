@@ -1,6 +1,6 @@
 import React from 'react';
 import { IEvent } from '@/lib/types';
-import ParticipantList from '@/components/admin/ParticipantList'; // Ensure this path is correct
+import ParticipantList from '@/components/admin/ParticipantList';
 import EventQrDisplay from '@/components/admin/EventQrDisplay';
 import mongoose from 'mongoose';
 
@@ -16,11 +16,12 @@ const StyledErrorDisplay = ({
 }) => {
   return (
     <div className="dark min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-gray-300 flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* ... (error component code remains the same) ... */}
+      {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-500/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl"></div>
       </div>
+      {/* Error Card */}
       <div className="bg-slate-900/80 backdrop-blur-2xl p-10 rounded-3xl border border-red-500/20 shadow-2xl max-w-md w-full text-center space-y-6 z-10 relative">
         <div className="relative">
           <div className="w-24 h-24 bg-gradient-to-br from-red-500/20 to-red-600/20 rounded-3xl flex items-center justify-center mx-auto backdrop-blur-xl border border-red-500/30 shadow-2xl">
@@ -114,12 +115,17 @@ export default async function EventDetailsPage({
   let errorMessage: string | null = null;
 
   try {
-    event = await getEventDetails(id);
+    const eventData = await getEventDetails(id);
+    if (eventData && eventData._id) {
+      event = eventData as IEvent;
+    } else {
+      errorMessage = 'Event data is incomplete or invalid';
+    }
   } catch (error: unknown) {
     errorMessage = error instanceof Error ? error.message : String(error);
   }
 
-  if (!event || errorMessage) {
+  if (errorMessage || !event || !event._id) {
     return (
       <StyledErrorDisplay
         id={id}
@@ -134,10 +140,9 @@ export default async function EventDetailsPage({
 
   // Main success UI
   return (
-    // --- ***THIS IS THE KEY*** ---
-    // min-h-screen (mobile) allows page to grow and scroll
-    // lg:h-screen (desktop) locks page height
-    // lg:overflow-hidden (desktop) hides the page scrollbar
+    // This layout is correct:
+    // min-h-screen for mobile scrolling
+    // lg:h-screen & lg:overflow-hidden for fixed desktop
     <div className="dark min-h-screen lg:h-screen flex flex-col bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-gray-300 p-4 md:p-6 relative lg:overflow-hidden">
       
       {/* Animated background elements */}
@@ -160,13 +165,12 @@ export default async function EventDetailsPage({
         <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6 md:gap-8 flex-1 min-h-0">
           
           {/* --- Item 1: Header --- */}
+          {/* This card can keep the blur, it doesn't open a modal */}
           <div className="lg:col-span-2 bg-slate-900/60 backdrop-blur-2xl p-5 rounded-3xl border border-slate-800/50 shadow-2xl flex-shrink-0">
-            <h1 className="text-2xl font-black bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent leading-tight">
+            <h1 className="text-4xl font-black bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 bg-clip-text text-transparent leading-tight">
               {event.name}
             </h1>
-            <p className="text-sm text-gray-400 font-medium mt-1">
-              Operations Dashboard
-            </p>
+         
             <div className="relative group pt-3">
               <div className="relative space-y-1.5">
                 <p className="text-gray-300 text-sm">
@@ -205,7 +209,7 @@ export default async function EventDetailsPage({
           </div>
 
           {/* --- Item 2: QR Code --- */}
-          {/* lg:row-span-2 makes it fill both grid rows on desktop */}
+          {/* This card can also keep the blur */}
           <div className="lg:col-span-1 lg:row-span-2">
             <div className="bg-slate-900/60 backdrop-blur-2xl p-6 md:p-8 rounded-3xl border border-slate-800/50 shadow-2xl flex flex-col items-center">
               <div className="text-center space-y-3 pb-6 border-b border-slate-800/50 w-full">
@@ -228,7 +232,7 @@ export default async function EventDetailsPage({
                   <div className="absolute inset-0 bg-gradient-to-br from-orange-500 to-orange-700 rounded-3xl blur-2xl opacity-40 animate-pulse"></div>
                 </div>
                 <h2 className="text-2xl font-black text-gray-200 pt-3">
-                  Live Check-in Kiosk
+                  Live Check-in
                 </h2>
               </div>
               <div className="pt-6 flex flex-col items-center gap-6">
@@ -241,10 +245,13 @@ export default async function EventDetailsPage({
             </div>
           </div>
 
-          {/* --- Item 3: List --- */}
-          {/* --- ***THIS WRAPPER IS ALSO KEY*** --- */}
-          {/* This container setup (flex-1, min-h-0, etc.) is correct and crucial. */}
-          {/* It works with the parent lg:h-screen to enable internal scroll. */}
+          {/* --- Item 3: List (THE FIX IS HERE) --- */}
+          {/*
+            I have REMOVED `backdrop-blur-2xl` from this div.
+            This will stop it from trapping your modal.
+            The `bg-slate-900/60` provides a solid (but still transparent)
+            background so it still looks like a card.
+          */}
           <div className="lg:col-span-2 bg-slate-900/60 rounded-3xl border border-slate-800/50 shadow-2xl flex-1 min-h-0 flex flex-col p-6 md:p-8">
             <ParticipantList event={event} />
           </div>

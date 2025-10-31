@@ -25,6 +25,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Event not found' }, { status: 404 });
     }
 
+    // Check for duplicate roll number across all participants
+    const existingRollNumber = await Participant.findOne({ rollNumber: rollNumber.toLowerCase() });
+    if (existingRollNumber) {
+      return NextResponse.json(
+        { success: false, error: 'This roll number is already registered' },
+        { status: 400 }
+      );
+    }
+
     // Check if participant is already registered for this event
     const existingParticipant = await Participant.findOne({ email, eventId });
     if (existingParticipant) {

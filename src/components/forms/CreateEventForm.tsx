@@ -52,7 +52,7 @@ const CreateEventForm: React.FC<CreateEventFormProps> = ({ onSuccess, onClose })
   };
 
   return (
-    <div className="bg-black rounded-2xl shadow-2xl p-6 sm:p-8 border-2 border-orange-500">
+  <div className="glass-modal glass-modal-centered shadow-2xl p-6 sm:p-8 border-2 border-orange-500 frosted-glass">
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Header with orange accent */}
         <div className="border-b-2 border-orange-500 pb-4">

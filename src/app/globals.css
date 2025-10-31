@@ -1,3 +1,12 @@
+/* Frosted glass effect for modals */
+.frosted-glass {
+  background: rgba(30, 30, 30, 0.55);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -135,4 +144,21 @@
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.5);
+}
+
+/* Reusable glass modal utility used by modal content wrappers */
+.glass-modal {
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 10px 30px rgba(2,6,23,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+  border-radius: 1rem; /* matches rounded-2xl */
+}
+
+.glass-modal-centered {
+  width: 100%;
+  max-width: 640px; /* comfortable modal width */
+  margin: 0 auto;
+  padding: 1.5rem; /* default padding, components may override */
 }
