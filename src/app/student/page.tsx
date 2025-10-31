@@ -231,32 +231,7 @@ export default function StudentPage() {
 
             {/* Enhanced Event Selection */}
             <div className="space-y-5">
-              <Select
-                id="event"
-                label="Choose Your Event"
-                value={selectedEventId}
-                onChange={(e) => setSelectedEventId(e.target.value)}
-                disabled={allEvents.length === 0}
-                required
-              >
-                  {allEvents.length === 0 ? (
-                    <option value="" disabled>Loading events...</option>
-                  ) : (
-                    <>
-                      <option value="" disabled>-- Select an Event --</option>
-                      {allEvents.map((event) => (
-                        <option key={String(event._id)} value={String(event._id)}>
-                          {event.name} • {new Date(event.date).toLocaleDateString('en-US', { 
-                            month: 'short', 
-                            day: 'numeric', 
-                            year: 'numeric' 
-                          })}
-                        </option>
-                      ))}
-                    </>
-                  )}
-                </Select>
-
+              
               {/* Enhanced Event Preview Card */}
               {selectedEventId && (
                 <div className="relative group">
@@ -386,9 +361,7 @@ export default function StudentPage() {
                 </div>
                 <div className="space-y-3">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg">
-                      {participant.name.charAt(0).toUpperCase()}
-                    </div>
+                
                     <div className="flex-1">
                       <p className="text-white font-semibold text-lg">{participant.name}</p>
                       <p className="text-sm text-gray-400 flex items-center space-x-1">

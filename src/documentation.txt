@@ -120,6 +120,5 @@ index.ts         - Model exports
 schemas/
 ├── AdminSchema.ts      - MongoDB schema for admin users
 ├── EventSchema.ts      - MongoDB schema for events
-├── ParticipantSchema.ts- MongoDB schema for participants
 └── StudentSchema.ts    - MongoDB schema for students
 

@@ -5,13 +5,13 @@ import Event from '@lib/models/Event';
 import Participant from '@lib/models/Participant';
 import { revalidatePath } from 'next/cache';
 
-// POST: Create a new participant
+// ✅ POST: Create a new participant
 export async function POST(request: Request) {
   await connectDB();
   try {
-    const { name, email, rollNumber, eventId } = await request.json(); // <-- Added rollNumber
+    const { name, email, rollNumber, eventId } = await request.json();
 
-    // --- Added rollNumber to validation ---
+    // Basic validation
     if (!name || !email || !rollNumber || !eventId) {
       return NextResponse.json(
         { success: false, error: 'Name, email, roll number, and event ID are required.' },
@@ -22,46 +22,68 @@ export async function POST(request: Request) {
     // Check if event exists
     const event = await Event.findById(eventId);
     if (!event) {
-      return NextResponse.json({ success: false, error: 'Event not found' }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: 'Event not found.' },
+        { status: 404 }
+      );
     }
 
-    // Check for duplicate roll number across all participants
-    const existingRollNumber = await Participant.findOne({ rollNumber: rollNumber.toLowerCase() });
+    // ✅ Check for duplicate roll number only within the same event
+    const existingRollNumber = await Participant.findOne({
+      rollNumber: rollNumber.toLowerCase(),
+      eventId,
+    });
     if (existingRollNumber) {
       return NextResponse.json(
-        { success: false, error: 'This roll number is already registered' },
+        { success: false, error: 'This roll number is already registered for this event.' },
         { status: 400 }
       );
     }
 
-    // Check if participant is already registered for this event
-    const existingParticipant = await Participant.findOne({ email, eventId });
+    // ✅ Check if the same email already registered for this event
+    const existingParticipant = await Participant.findOne({ email: email.toLowerCase(), eventId });
     if (existingParticipant) {
       return NextResponse.json(
-        { success: false, error: 'Participant is already registered for this event' },
+        { success: false, error: 'Participant is already registered for this event.' },
         { status: 400 }
       );
     }
 
-    // --- Create new participant with rollNumber ---
-    const newParticipant = await Participant.create({ name, email, rollNumber, eventId });
+    // Create participant
+    const newParticipant = await Participant.create({
+      name,
+      email: email.toLowerCase(),
+      rollNumber: rollNumber.toLowerCase(),
+      eventId,
+    });
 
-    // Add participant reference to the event's participants array
+    // Add participant reference to the event’s participants array
     event.participants.push(newParticipant._id);
     await event.save();
 
-    // Revalidate the event page path to show new data
+    // Revalidate event page to reflect new participant
     revalidatePath(`/admin/events/${eventId}`);
 
     return NextResponse.json({ success: true, data: newParticipant }, { status: 201 });
-  } catch (error) {
-    return NextResponse.json({ success: false, error: (error as Error).message }, { status: 400 });
+
+  } catch (error: any) {
+    // Handle duplicate key errors from MongoDB (race condition safety)
+    if (error.code === 11000) {
+      return NextResponse.json(
+        { success: false, error: 'Duplicate entry: this roll number is already registered for the event.' },
+        { status: 400 }
+      );
+    }
+
+    console.error('Error creating participant:', error);
+    return NextResponse.json(
+      { success: false, error: error.message || 'Something went wrong.' },
+      { status: 500 }
+    );
   }
 }
 
-
-// --- NEW DELETE FUNCTION ---
-// DELETE: Delete a participant by ID
+// ✅ DELETE: Delete a participant by ID
 export async function DELETE(request: NextRequest) {
   await connectDB();
   try {
@@ -70,7 +92,7 @@ export async function DELETE(request: NextRequest) {
 
     if (!id) {
       return NextResponse.json(
-        { success: false, error: 'Participant ID is required' },
+        { success: false, error: 'Participant ID is required.' },
         { status: 400 }
       );
     }
@@ -80,21 +102,28 @@ export async function DELETE(request: NextRequest) {
 
     if (!deletedParticipant) {
       return NextResponse.json(
-        { success: false, error: 'Participant not found' },
+        { success: false, error: 'Participant not found.' },
         { status: 404 }
       );
     }
 
-    // Remove participant's ID from the corresponding event's participants array
+    // Remove from the event’s participants array
     await Event.findByIdAndUpdate(deletedParticipant.eventId, {
       $pull: { participants: deletedParticipant._id },
     });
 
-    // Revalidate the event page to reflect the change
+    // Revalidate the event page
     revalidatePath(`/admin/events/${deletedParticipant.eventId.toString()}`);
 
-    return NextResponse.json({ success: true, data: { message: 'Participant deleted' } }, { status: 200 });
-  } catch (error) {
-    return NextResponse.json({ success: false, error: (error as Error).message }, { status: 500 });
+    return NextResponse.json(
+      { success: true, data: { message: 'Participant deleted successfully.' } },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    console.error('Error deleting participant:', error);
+    return NextResponse.json(
+      { success: false, error: error.message || 'Something went wrong.' },
+      { status: 500 }
+    );
   }
 }
